@@ -1,0 +1,93 @@
+.chat-area { padding: 28px 36px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; height: calc(100vh - 200px); }
+.chat-area .date-divider { text-align: center; color: var(--text-4); font-size: 11px; padding: 12px 0; }
+
+.chat-msg .who-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.chat-msg .who-row .name { font-size: 12px; font-weight: 700; color: var(--text-1); }
+.chat-msg .who-row .time { font-size: 11px; color: var(--text-3); }
+.chat-msg .who-row .pill { font-size: 10px; }
+
+.chat-msg.cmo { display: flex; gap: 12px; }
+.chat-msg.cmo .chat-content { flex: 1; max-width: 720px; }
+.chat-msg.user { display: flex; justify-content: flex-end; }
+.chat-msg.user .chat-content { max-width: 560px; }
+.chat-msg.user .chat-bubble { background: var(--bg-3); color: var(--text-1); border-radius: 14px 14px 4px 14px; padding: 12px 16px; }
+
+.chat-bubble { font-size: 14px; line-height: 1.5; color: var(--text-1); }
+
+/* Critique loop card */
+.critique-card {
+  margin-top: 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(168,85,247,0.05));
+  border: 1.5px solid rgba(245,158,11,0.4);
+  border-radius: 14px;
+  padding: 18px 22px;
+  position: relative;
+}
+.critique-card::before {
+  content: '⚠';
+  position: absolute;
+  top: -12px; left: 20px;
+  background: var(--amber);
+  color: #000;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.critique-card .critique-eyebrow {
+  color: var(--amber);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.critique-card h4 { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 10px; }
+.critique-card .reason { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 12px; }
+.critique-card .reason strong { color: var(--text-1); }
+.critique-card .vs-block { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.critique-card .vs-cell { background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 10px; padding: 12px 14px; }
+.critique-card .vs-cell.bad { border-color: rgba(239,68,68,0.3); }
+.critique-card .vs-cell.good { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+.critique-card .vs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 6px; }
+.critique-card .vs-cell.bad .vs-label { color: var(--red); }
+.critique-card .vs-cell.good .vs-label { color: var(--green); }
+.critique-card .vs-body { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+.critique-card .vs-body strong { color: var(--text-1); }
+.critique-card .actions { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Proposal card */
+.proposal-block {
+  margin-top: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.proposal-block .ph { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--magenta); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+.proposal-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+.proposal-block .preview-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
+.proposal-block .var-card { background: var(--bg-3); border: 1px solid var(--border-2); border-radius: 8px; padding: 12px; font-size: 12px; color: var(--text-2); }
+.proposal-block .var-card .var-label { font-size: 10px; color: var(--text-3); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
+.proposal-block .var-card .var-headline { color: var(--text-1); font-weight: 600; margin-bottom: 4px; }
+.proposal-block .actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Composer */
+.composer {
+  border-top: 1px solid var(--border-1);
+  background: var(--bg-1);
+  padding: 16px 36px;
+  position: sticky;
+  bottom: 0;
+}
+.composer .row { display: flex; gap: 10px; align-items: flex-end; }
+.composer textarea {
+  resize: none; min-height: 44px; max-height: 180px;
+  background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 10px;
+  padding: 12px 14px;
+  width: 100%;
+}
+.composer .helpers { display: flex; gap: 6px; margin-top: 8px; }
+.composer .helper-pill { font-size: 11px; padding: 4px 10px; background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 100px; color: var(--text-3); cursor: pointer; }
+.composer .helper-pill:hover { color: var(--text-1); border-color: var(--cyan); }

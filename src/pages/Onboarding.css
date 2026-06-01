@@ -1,0 +1,55 @@
+.screen-bar { position: sticky; top: 0; left: 0; right: 0; background: var(--bg-1); border-bottom: 1px solid var(--border-1); padding: 8px 20px; font-size: 11px; color: var(--text-3); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+.screen-bar .id { font-family: var(--font-mono); color: var(--magenta); }
+.screen-bar a { color: var(--cyan); }
+
+.onboarding-wrap { max-width: 820px; margin: 0 auto; padding: 50px 40px 80px; }
+
+.stepper { margin-bottom: 36px; }
+.step .label { display: none; }
+@media (min-width: 800px) { .step .label { display: inline; } }
+
+.step-content { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: 18px; padding: 36px 40px; margin-bottom: 24px; }
+.step-eyebrow { font-size: 11px; color: var(--cyan); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; }
+.step-content h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 8px; }
+.step-content p.intro { color: var(--text-2); font-size: 14px; margin-bottom: 24px; }
+
+.upload-zone { border: 2px dashed var(--border-3); border-radius: 12px; padding: 32px; text-align: center; background: var(--bg-2); }
+.upload-zone .icon { font-size: 32px; margin-bottom: 8px; }
+.upload-zone .title { font-size: 14px; font-weight: 600; }
+.upload-zone .sub { color: var(--text-3); font-size: 12px; margin-top: 4px; }
+.upload-zone .browse { color: var(--cyan); text-decoration: underline; cursor: pointer; }
+
+.uploaded-files { margin-top: 16px; }
+.uploaded-files .file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+.uploaded-files .file .ext { width: 32px; height: 32px; border-radius: 6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: white; }
+.ext-pdf { background: #ef4444; }
+.ext-ppt { background: #f59e0b; }
+.ext-csv { background: #10b981; }
+.uploaded-files .file .meta { flex: 1; }
+.uploaded-files .file .name { font-weight: 600; color: var(--text-1); }
+.uploaded-files .file .size { color: var(--text-3); font-size: 11px; }
+.uploaded-files .file .status { font-size: 11px; color: var(--green); }
+
+.integration-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (max-width: 600px) { .integration-grid { grid-template-columns: 1fr; } }
+.integration-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 10px; }
+.integration-card .logo { width: 36px; height: 36px; border-radius: 8px; background: var(--bg-3); display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; }
+.integration-card .info { flex: 1; }
+.integration-card .name { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.integration-card .why { font-size: 11px; color: var(--text-3); }
+.integration-card.connected { background: var(--green-soft); border-color: rgba(16,185,129,0.3); }
+.integration-card.connected .btn { background: var(--green); border: none; color: white; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+.nav-row .skip { color: var(--text-3); font-size: 12px; cursor: pointer; }
+
+.progress-meter { margin-bottom: 16px; font-size: 12px; color: var(--text-3); display: flex; justify-content: space-between; }
+
+.friendly-tip { background: var(--magenta-soft); border-left: 3px solid var(--magenta); padding: 12px 14px; border-radius: 0 8px 8px 0; margin-top: 16px; font-size: 12px; color: var(--text-1); display: flex; gap: 10px; }
+.friendly-tip .avatar-mini { width: 28px; height: 28px; border-radius: 8px; background: var(--gradient-cmo); display: grid; place-items: center; font-weight: 700; color: white; font-size: 11px; flex-shrink: 0; }
+
+.other-step { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: 14px; padding: 18px 22px; margin-top: 12px; opacity: 0.6; cursor: pointer; }
+.other-step .head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); }
+.other-step.done { opacity: 1; border-color: rgba(16,185,129,0.3); }
+.other-step.done .head .check { color: var(--green); }
+.other-step:hover { border-color: var(--magenta); opacity: 1; }

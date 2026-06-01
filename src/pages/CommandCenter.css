@@ -1,0 +1,47 @@
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+@media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+.layout-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+@media (max-width: 1100px) { .layout-2col { grid-template-columns: 1fr; } }
+
+.cmo-focus {
+  background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.04));
+  border: 1px solid rgba(168,85,247,0.3);
+  border-radius: var(--radius-lg);
+  padding: 22px 26px;
+  margin-bottom: 18px;
+}
+.cmo-focus .head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.cmo-focus .head .who { font-weight: 700; font-size: 14px; }
+.cmo-focus .head .who span { color: var(--text-3); font-weight: 400; font-size: 12px; display: block; margin-top: 1px; }
+.cmo-focus .msg { font-size: 15px; color: var(--text-1); line-height: 1.6; }
+.cmo-focus .actions { margin-top: 14px; display: flex; gap: 8px; }
+
+.approvals-card, .timeline-card { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 18px; }
+.approvals-card .head, .timeline-card .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.approval-item { display: flex; gap: 12px; padding: 12px; background: var(--bg-2); border-radius: 10px; margin-bottom: 8px; align-items: center; }
+.approval-item .preview { width: 44px; height: 44px; border-radius: 8px; background: var(--bg-3); display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
+.approval-item .info { flex: 1; min-width: 0; }
+.approval-item .title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.approval-item .meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.approval-item .btns { display: flex; gap: 4px; }
+
+.timeline-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--border-1); font-size: 13px; align-items: flex-start; }
+.timeline-item:last-child { border-bottom: 0; }
+.timeline-item .time { color: var(--text-3); font-size: 11px; font-family: var(--font-mono); flex-shrink: 0; width: 60px; padding-top: 1px; }
+.timeline-item .text { color: var(--text-2); }
+.timeline-item .text strong { color: var(--text-1); }
+
+.agents-mini { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 18px; }
+.agents-mini .agent-row { display: flex; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border-1); }
+.agents-mini .agent-row:last-child { border-bottom: 0; }
+.agents-mini .agent-row .info { flex: 1; min-width: 0; }
+.agents-mini .agent-row .name { font-size: 13px; font-weight: 600; }
+.agents-mini .agent-row .task { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.goal-card { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 18px; }
+.goal-card .gh { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.goal-card .goal-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.goal-card .stats { display: flex; gap: 16px; margin-top: 14px; font-size: 12px; }
+.goal-card .stats .stat .v { font-size: 16px; font-weight: 700; color: var(--text-1); }
+.goal-card .stats .stat .l { font-size: 11px; color: var(--text-3); }
