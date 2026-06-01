@@ -101,7 +101,7 @@
 
 /* Sticky bottom bar */
 .approve-bar {
-  position: sticky; bottom: 16px;
+  position: sticky; bottom: 16px; z-index: 100;
   background: var(--bg-1);
   border: 1px solid var(--border-2);
   border-radius: 14px;

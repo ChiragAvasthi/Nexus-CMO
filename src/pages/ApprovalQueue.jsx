@@ -199,10 +199,7 @@ export default function ApprovalQueue() {
           </div>
         </div>
 
-        <div className="dev-note" style={{ marginTop: '28px' }}>
-          <strong>Dev note — Approval Queue logic:</strong>
-          Every Asset has a <code>qc_verdict</code> (CMO's internal call) and a <code>user_status</code> (final user call).
-        </div>
+
       </div>
     </>
   );

@@ -156,9 +156,7 @@ export default function AssetLibrary() {
           </div>
         </div>
 
-        <div className="dev-note" style={{ marginTop: '30px' }}>
-          <strong>Dev note — Asset versioning:</strong> Every asset is versioned (<code>FR-14</code>). When CMO updates an asset (Asset Evolution, <code>FR-17</code>) the previous version moves to Archived but stays queryable.
-        </div>
+
       </div>
     </>
   );

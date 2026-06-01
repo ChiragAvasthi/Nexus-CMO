@@ -7,10 +7,7 @@ export default function TruthReport() {
 
   return (
     <>
-      <div className="screen-bar">
-        <span><span className="id">SCREEN 05</span> &middot; Truth Report &middot; <code style={{ color: 'var(--text-4)' }}>FR-07, FR-08</code> &middot; <strong style={{ color: 'var(--magenta)' }}>HERO MOMENT</strong></span>
-        <span><Link to="/">← All screens</Link> &middot; <Link to="/command-center">Next: Command Center →</Link></span>
-      </div>
+
 
       <div className="truth-wrap">
         <div className="report-head">
@@ -176,9 +173,7 @@ export default function TruthReport() {
           </div>
         </div>
 
-        <div className="dev-note" style={{ marginTop: '20px' }}>
-          <strong>Dev note:</strong> Each loophole is a DB entity (<code>FR-08</code>). User must approve ≥ 1 to proceed. Approved fixes spawn tasks in the relevant agent's queue immediately.
-        </div>
+
       </div>
     </>
   );

@@ -7,10 +7,7 @@ export default function Pricing() {
 
   return (
     <>
-      <div className="screen-bar">
-        <span><span className="id">SCREEN 02</span> &middot; Pick Your Plan &middot; <code style={{ color: 'var(--text-4)' }}>§5 Pricing</code></span>
-        <span><Link to="/signup">← Sign Up</Link> &middot; <Link to="/">All</Link> &middot; <Link to="/onboarding">Next: Onboarding →</Link></span>
-      </div>
+
 
       <div className="pricing-wrap">
         <div className="pricing-header">

@@ -7,10 +7,7 @@ export default function Signup() {
 
   return (
     <>
-      <div className="screen-bar">
-        <span><span className="id">SCREEN 01</span> &middot; Sign Up &middot; <code style={{ color: 'var(--text-4)' }}>FR-01</code></span>
-        <span><Link to="/">← All screens</Link> &middot; <Link to="/pricing">Next: Pricing →</Link></span>
-      </div>
+
 
       <div className="signup-wrap">
         <div className="signup-left">

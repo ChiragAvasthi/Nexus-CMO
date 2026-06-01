@@ -26,10 +26,7 @@ export default function Onboarding() {
 
   return (
     <>
-      <div className="screen-bar">
-        <span><span className="id">SCREEN 03</span> &middot; Onboarding Wizard &middot; <code style={{ color: 'var(--text-4)' }}>FR-02 to FR-06</code></span>
-        <span><Link to="/pricing">← Pricing</Link> &middot; <Link to="/">All</Link> &middot; <Link to="/command-center">Next: Command Center →</Link></span>
-      </div>
+
 
       <div className="onboarding-wrap">
         {/* Stepper */}

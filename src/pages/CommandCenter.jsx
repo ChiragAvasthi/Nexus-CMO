@@ -201,9 +201,7 @@ export default function CommandCenter() {
           </div>
         </div>
 
-        <div className="dev-note" style={{ marginTop: '24px' }}>
-          <strong>Dev note:</strong> Real-time (websocket) for CMO focus + agent dots. Polled hourly: KPIs, goal progress. Reference: <code>FR-18, FR-20</code>.
-        </div>
+
       </div>
     </>
   );

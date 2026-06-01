@@ -166,9 +166,7 @@ export default function AgentPerformance() {
           </div>
         </div>
 
-        <div className="dev-note" style={{ marginTop: '24px' }}>
-          <strong>Dev note:</strong> 9 agents total (Alex CMO + 8 specialists). Each agent has a designation emoji icon + accent color. Status: <code>working | idle | blocked</code>. Quinn's tools: SimilarWeb, BuiltWith, G2, Capterra, SEMrush, web scrapers.
-        </div>
+
 
       </div>
     </>
