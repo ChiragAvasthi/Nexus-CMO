@@ -1,0 +1,68 @@
+/* ============ RESPONSIVE & MOBILE ============ */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  
+  .sidebar {
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 260px;
+    height: 100vh;
+    box-shadow: var(--shadow-2);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+  
+  .hamburger { display: block !important; }
+  
+  /* Grid Breakpoints */
+  .layout-2col { grid-template-columns: 1fr !important; }
+  .grid-agents { grid-template-columns: 1fr !important; }
+  .kpi-row { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  .asset-grid { grid-template-columns: 1fr !important; }
+  .preview-grid { grid-template-columns: 1fr !important; }
+  
+  /* Approval Queue specific */
+  .approval-row .head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .approval-row .actions { flex-direction: column; align-items: stretch; }
+  .approval-row .actions .btn { margin-left: 0 !important; width: 100%; }
+  
+  /* Touch Targets */
+  .btn, .sidebar nav a { min-height: 44px; }
+  input[type=text], input[type=email], input[type=password], input[type=number], select { min-height: 44px; }
+  
+  /* Other mobile adjustments */
+  .topbar { padding: 14px 20px; gap: 12px; }
+  .content { padding: 20px; }
+  
+  .severity-row { flex-direction: column; align-items: stretch; }
+  .approve-bar { flex-direction: column; text-align: center; }
+  .approve-bar .right { margin-left: 0; width: 100%; justify-content: stretch; }
+  .approve-bar .right .btn { flex: 1; }
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-1);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: 90;
+  display: none;
+  backdrop-filter: blur(2px);
+}

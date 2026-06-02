@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password_hash String?
+  googleId      String?     @unique
+  name          String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  workspaces    Workspace[]
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id])
+  assets    Asset[]
+  tasks     Task[]
+}
+
+model Asset {
+  id          String    @id @default(uuid())
+  title       String
+  type        String
+  status      String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  agentId     String
+  status      String
+  description String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  threadId   String
+  senderRole String
+  content    String
+  createdAt  DateTime @default(now())
+}

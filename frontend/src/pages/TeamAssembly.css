@@ -1,0 +1,161 @@
+.team-assembly-wrap { max-width: 980px; margin: 0 auto; padding: 50px 24px 80px; }
+
+/* Hero */
+.ta-hero { text-align: center; margin-bottom: 36px; }
+.ta-hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--magenta-soft);
+  color: var(--magenta);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 18px;
+}
+.ta-hero h1 { font-size: 38px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.15; margin-bottom: 10px; color: var(--text-1); }
+.ta-hero .sub { font-size: 16px; color: var(--text-2); max-width: 560px; margin: 0 auto; }
+
+/* CMO Speech Bubble */
+.cmo-speech {
+  background: linear-gradient(135deg, #ede9fe, #cffafe);
+  border: 1px solid #ddd6fe;
+  border-radius: 18px;
+  padding: 22px 26px;
+  margin-bottom: 36px;
+  display: flex; gap: 18px;
+}
+.cmo-speech .avatar {
+  width: 56px; height: 56px;
+  background: var(--gradient-cmo);
+  border-radius: 16px;
+  display: grid; place-items: center;
+  color: white; font-size: 28px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-glow);
+}
+.cmo-speech .info { flex: 1; }
+.cmo-speech .who { font-size: 12px; color: var(--magenta); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.cmo-speech .msg { font-size: 16px; color: var(--text-1); line-height: 1.5; }
+.cmo-speech .msg strong { color: var(--magenta); }
+
+/* Section Labels */
+.ta-sec-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  margin: 36px 0 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.ta-sec-label.active { color: var(--green); }
+.ta-sec-label.hold { color: var(--text-3); }
+.ta-sec-label .count {
+  padding: 2px 9px; border-radius: 100px;
+  font-size: 11px; font-weight: 800;
+}
+.ta-sec-label.active .count { background: var(--green-soft); color: var(--green); }
+.ta-sec-label.hold .count { background: var(--bg-3); color: var(--text-3); }
+
+/* Agent Grid */
+.ta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 800px) { .ta-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .ta-grid { grid-template-columns: 1fr; } }
+
+/* Agent Card */
+.ta-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border-1);
+  border-radius: 16px;
+  padding: 20px 18px;
+  box-shadow: var(--shadow-1);
+  transition: all 0.2s;
+}
+.ta-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+.ta-card.active { border-left: 4px solid var(--green); }
+.ta-card.hold { background: var(--bg-2); border-style: dashed; opacity: 0.85; }
+.ta-card.hold:hover { opacity: 1; }
+
+.ta-card .icon-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.ta-card .role-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.ta-card .role-name { font-weight: 800; font-size: 17px; color: var(--text-1); }
+.ta-card .role-title { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 1px; }
+
+.ta-card .task {
+  background: var(--bg-2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.45;
+  min-height: 56px;
+}
+.ta-card.hold .task {
+  background: transparent;
+  border: 1px dashed var(--border-3);
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.ta-card .status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px;
+}
+.ta-status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ta-pill-working { background: var(--green-soft); color: var(--green); }
+.ta-pill-hold { background: var(--bg-3); color: var(--text-3); }
+
+.ta-card .activate-btn {
+  font-size: 11px; color: var(--magenta);
+  font-weight: 700; cursor: pointer;
+  text-decoration: none;
+  background: none; border: none;
+  font-family: var(--font);
+}
+.ta-card .activate-btn:hover { text-decoration: underline; }
+
+.new-badge {
+  font-size: 10px; background: #fee2e2; color: #dc2626;
+  padding: 1px 6px; border-radius: 4px;
+  font-weight: 700; margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Next Step CTA */
+.ta-next-step {
+  background: linear-gradient(135deg, #ede9fe, #cffafe);
+  border: 1px solid #ddd6fe;
+  border-radius: 18px;
+  padding: 28px 32px;
+  margin-top: 36px;
+  text-align: center;
+}
+.ta-next-step h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-1); }
+.ta-next-step p { font-size: 14px; color: var(--text-2); margin-bottom: 16px; }
+.ta-progress-wrap {
+  background: var(--bg-3);
+  height: 8px; border-radius: 100px; overflow: hidden;
+  max-width: 400px; margin: 0 auto 12px;
+}
+.ta-progress-wrap > span {
+  display: block; height: 100%;
+  background: var(--gradient-cmo);
+  width: 72%;
+  animation: ta-pulse 2s ease-in-out infinite;
+}
+@keyframes ta-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.ta-next-step .countdown { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
