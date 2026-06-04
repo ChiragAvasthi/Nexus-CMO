@@ -123,12 +123,45 @@ io.on('connection', (socket) => {
             });
             newTasks.push(createdAsset);
 
-            // Run tactical agent in the background
+            // Run tactical agent in the background with evaluation loop
             (async () => {
               try {
                 const { executeTacticalTask } = await import('./src/services/agent.service.js');
-                const assetContent = await executeTacticalTask(t, workspace);
+                const { evaluateTaskByCmo } = await import('./src/services/ai.service.js');
                 
+                let maxIterations = 3;
+                let currentIteration = 0;
+                let isApproved = false;
+                let assetContent = null;
+                let currentFeedback = "";
+
+                while (currentIteration < maxIterations && !isApproved) {
+                  currentIteration++;
+                  
+                  // If revising, emit 'revising' status
+                  if (currentIteration > 1) {
+                    await prisma.asset.update({ where: { id: createdAsset.id }, data: { status: 'revising' } });
+                    io.to(data.workspaceId).emit('tasks_updated', { workspaceId: data.workspaceId, productId: productId });
+                  }
+
+                  // 1. Agent Generates Content
+                  assetContent = await executeTacticalTask({ ...t, feedback: currentFeedback }, workspace);
+                  
+                  // 2. Update status to reviewing
+                  await prisma.asset.update({ where: { id: createdAsset.id }, data: { status: 'reviewing', content: assetContent } });
+                  io.to(data.workspaceId).emit('tasks_updated', { workspaceId: data.workspaceId, productId: productId });
+
+                  // 3. CMO Reviews Content
+                  const cmoReview = await evaluateTaskByCmo(t.description, assetContent, workspace);
+                  
+                  if (cmoReview.approved) {
+                    isApproved = true;
+                  } else {
+                    currentFeedback = cmoReview.feedback;
+                  }
+                }
+                
+                // 4. Finalize
                 await prisma.asset.update({
                   where: { id: createdAsset.id },
                   data: { 
@@ -136,10 +169,15 @@ io.on('connection', (socket) => {
                     status: 'completed'
                   }
                 });
+                io.to(data.workspaceId).emit('tasks_updated', { workspaceId: data.workspaceId, productId: productId });
               } catch (e) {
                 console.error('Tactical task execution failed:', e);
               }
             })();
+          }
+          
+          if (newTasks.length > 0) {
+            io.to(data.workspaceId).emit('tasks_updated', { workspaceId: data.workspaceId, productId: productId });
           }
         }
       } catch(e) {

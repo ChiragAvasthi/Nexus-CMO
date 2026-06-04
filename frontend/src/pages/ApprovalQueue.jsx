@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './ApprovalQueue.css';
+import io from 'socket.io-client';
 
 export default function ApprovalQueue() {
   const { setSidebarOpen } = useOutletContext();
   const { workspace, activeProductId } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [tasks, setTasks] = useState([]);
+  const [refreshQueue, setRefreshQueue] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +34,22 @@ export default function ApprovalQueue() {
       }
     };
     fetchTasks();
+  }, [workspace, activeProductId, refreshQueue]);
+
+  useEffect(() => {
+    if (!workspace) return;
+    
+    const socket = io('http://localhost:5000');
+    socket.emit('join_workspace', workspace.id);
+
+    socket.on('tasks_updated', (payload) => {
+      if (activeProductId && payload.productId && payload.productId !== activeProductId) return;
+      setRefreshQueue(prev => prev + 1);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [workspace, activeProductId]);
 
   const approve = async (taskId) => {
@@ -49,9 +67,9 @@ export default function ApprovalQueue() {
     }
   };
 
-  const pendingTasks = tasks.filter(t => t.status === 'pending');
+  const pendingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'completed' || t.status === 'reviewing' || t.status === 'revising');
   const rejectedTasks = tasks.filter(t => t.status === 'rejected');
-  const approvedTasks = tasks.filter(t => t.status === 'approved');
+  const approvedTasks = tasks.filter(t => t.status === 'approved' || t.status === 'live');
 
   return (
     <>
@@ -117,7 +135,16 @@ export default function ApprovalQueue() {
                     </div>
 
                     <div className="actions" style={{ marginTop: '20px' }}>
-                      <button className="btn btn-success" onClick={() => approve(task.id)}>✓ Approve</button>
+                      <button 
+                        className="btn btn-success" 
+                        onClick={() => approve(task.id)}
+                        disabled={task.status !== 'completed'}
+                      >
+                        {task.status === 'pending' ? '⏳ Generating...' 
+                          : task.status === 'reviewing' ? '👀 CMO Reviewing...' 
+                          : task.status === 'revising' ? '✍️ Agent Revising...' 
+                          : '✓ Approve'}
+                      </button>
                       <button className="btn btn-danger" style={{ marginLeft: 'auto' }}>⨯ Reject</button>
                     </div>
                   </div>

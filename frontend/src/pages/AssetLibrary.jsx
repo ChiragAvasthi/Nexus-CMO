@@ -124,7 +124,7 @@ export default function AssetLibrary() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {dynamicFilters.map(f => (
+          {dynamicFilters.filter(f => f.key === 'all' || f.count > 0).map(f => (
             <span
               key={f.key}
               className={`chip${activeFilter === f.key ? ' active' : ''}`}

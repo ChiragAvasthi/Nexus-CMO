@@ -10,16 +10,20 @@ const agents = {
   bdm: { name: 'Casey', role: 'Growth BDM', icon: '🧭', bg: '#ccfbf1' },
   design: { name: 'Priya', role: 'Designer', icon: '🎨', bg: '#ede9fe' },
   data: { name: 'Riley', role: 'Data Analyst', icon: '📊', bg: '#d1fae5' },
+  marcus: { name: 'Marcus', role: 'Outreach Specialist', icon: '✉️', bg: '#fef3c7' },
+  devon: { name: 'Devon', role: 'Implementation', icon: '⚙️', bg: '#fff7ed' },
+  quinn: { name: 'Quinn', role: 'Research Analyst', icon: '🔬', bg: '#fee2e2' },
   cmo: { name: 'Alex', role: 'CMO', icon: '🎯', bg: '#fef08a' }
 };
 
 export default function AgentChat() {
   const { setSidebarOpen } = useOutletContext();
   const { agentId } = useParams();
-  const { workspace } = useAuth();
+  const { workspace, activeProductId } = useAuth();
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [refreshTasks, setRefreshTasks] = useState(0);
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
@@ -76,7 +80,7 @@ export default function AgentChat() {
       }
     };
     fetchTasks();
-  }, [workspace, agentId, activeProductId]);
+  }, [workspace, agentId, activeProductId, refreshTasks]);
 
   // Connect WebSocket
   useEffect(() => {
@@ -95,6 +99,11 @@ export default function AgentChat() {
         text: msg.content,
         time: msg.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
+    });
+
+    socketRef.current.on('tasks_updated', (payload) => {
+      if (activeProductId && payload.productId && payload.productId !== activeProductId) return;
+      setRefreshTasks(prev => prev + 1);
     });
 
     return () => {

@@ -1,9 +1,109 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import io from 'socket.io-client';
 import './AgentPerformance.css';
+
+const agentsList = [
+  { id: 'seo', name: 'Maya', role: 'SEO Architect', icon: '🔍', bg: '#cffafe' },
+  { id: 'smm', name: 'Jordan', role: 'SMM Specialist', icon: '📣', bg: '#fce7f3' },
+  { id: 'bdm', name: 'Casey', role: 'Lead Scout', icon: '🧭', bg: '#ccfbf1' },
+  { id: 'marcus', name: 'Marcus', role: 'Outreach Specialist', icon: '✉️', bg: '#fef3c7' },
+  { id: 'devon', name: 'Devon', role: 'Implementation', icon: '⚙️', bg: '#fff7ed' },
+  { id: 'design', name: 'Priya', role: 'Designer', icon: '🎨', bg: '#ede9fe' },
+  { id: 'data', name: 'Riley', role: 'Data Analyst', icon: '📊', bg: '#d1fae5' },
+  { id: 'quinn', name: 'Quinn', role: 'Research Analyst', icon: '🔬', bg: '#fee2e2', isNew: true }
+];
 
 export default function AgentPerformance() {
   const { setSidebarOpen } = useOutletContext();
+  const { workspace, activeProductId } = useAuth();
+  const [tasks, setTasks] = useState([]);
+  const [refreshTasks, setRefreshTasks] = useState(0);
+
+  useEffect(() => {
+    if (!workspace) return;
+    
+    const socket = io('http://localhost:5000');
+    socket.emit('join_workspace', workspace.id);
+
+    socket.on('tasks_updated', (payload) => {
+      if (activeProductId && payload.productId && payload.productId !== activeProductId) return;
+      setRefreshTasks(prev => prev + 1);
+    });
+
+    return () => socket.disconnect();
+  }, [workspace, activeProductId]);
+
+  useEffect(() => {
+    if (!workspace) return;
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem('nexus_token');
+        let url = `/api/workspace/${workspace.id}/tasks`;
+        if (activeProductId) {
+          url += `?productId=${activeProductId}`;
+        }
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setTasks(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTasks();
+  }, [workspace, activeProductId, refreshTasks]);
+
+  // Determine active vs standby agents
+  const activeAgentIds = new Set(tasks.filter(t => ['pending', 'reviewing', 'revising', 'working'].includes(t.status)).map(t => t.agentId));
+
+  const workingAgents = agentsList.filter(a => activeAgentIds.has(a.id));
+  const standbyAgents = agentsList.filter(a => !activeAgentIds.has(a.id));
+
+  const renderAgentCard = (agent, isIdle) => {
+    const agentTasks = tasks.filter(t => t.agentId === agent.id && ['pending', 'reviewing', 'revising', 'working'].includes(t.status));
+    const activeTask = agentTasks.length > 0 ? agentTasks[0] : null;
+    
+    let statusText = isIdle ? '💤 Idle' : '⚡ Active';
+    let statusClass = isIdle ? 'status-idle' : 'status-working';
+    let taskText = isIdle ? 'Awaiting assignment.' : `Working on: ${activeTask?.description || activeTask?.title || 'task'}`;
+    
+    if (!isIdle && activeTask?.status === 'reviewing') {
+      statusText = '👀 Reviewing';
+      taskText = `CMO is reviewing: ${activeTask?.description || activeTask?.title}`;
+    } else if (!isIdle && activeTask?.status === 'revising') {
+      statusText = '✍️ Revising';
+      taskText = `Revising: ${activeTask?.description || activeTask?.title}`;
+    }
+
+    return (
+      <div className={`a-card ${isIdle ? 'idle' : ''}`} key={agent.id}>
+        <div className="head">
+          <div className="role-icon" style={{ background: agent.bg }}>{agent.icon}</div>
+          <div>
+            <h3 style={isIdle ? { color: 'var(--text-2)' } : {}}>{agent.name} {agent.isNew && <span className="new-pill">NEW</span>}</h3>
+            <div className="role">{agent.role}</div>
+          </div>
+          <span className={`status ${statusClass}`}>{statusText}</span>
+        </div>
+        <div className="task" style={{ 
+          whiteSpace: 'nowrap', 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis' 
+        }}>
+          {taskText}
+        </div>
+        <div className="btns">
+          <Link to={`/agents/${agent.id}`} className={`btn ${isIdle ? 'btn-ghost' : 'btn-primary'}`}>💬 DM {agent.name}</Link>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="topbar">
@@ -27,145 +127,26 @@ export default function AgentPerformance() {
           <div className="ic-big">🎯</div>
           <div className="info">
             <h2>Alex &middot; CMO <span className="status status-working" style={{ marginLeft: '6px' }}><span className="dot dot-live"></span> Active</span></h2>
-            <div className="desc">Ready to oversee your marketing strategy &middot; 0 decisions this week</div>
+            <div className="desc">Overseeing your marketing strategy</div>
           </div>
           <Link to="/war-room" className="btn btn-primary btn-sm">💬 Chat with Alex</Link>
         </div>
 
         {/* WORKING */}
-        <div className="sec-label working">⚡ Working right now <span className="count">0</span></div>
-
-        <div className="grid-agents">
-          <div className="a-card">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#cffafe' }}>🔍</div>
-              <div>
-                <h3>Maya</h3>
-                <div className="role">SEO Architect</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
+        {workingAgents.length > 0 && (
+          <>
+            <div className="sec-label working">⚡ Working right now <span className="count">{workingAgents.length}</span></div>
+            <div className="grid-agents">
+              {workingAgents.map(agent => renderAgentCard(agent, false))}
             </div>
-            <div className="task">Awaiting assignment.</div>
-            <div className="btns">
-              <Link to="/agents/seo" className="btn btn-primary">💬 DM Maya</Link>
-            </div>
-          </div>
-
-          <div className="a-card">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#fce7f3' }}>📣</div>
-              <div>
-                <h3>Jordan</h3>
-                <div className="role">SMM Specialist</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Awaiting assignment.</div>
-            <div className="btns">
-              <Link to="/agents/smm" className="btn btn-primary">💬 DM Jordan</Link>
-            </div>
-          </div>
-
-          <div className="a-card">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#ccfbf1' }}>🧭</div>
-              <div>
-                <h3>Casey</h3>
-                <div className="role">Lead Scout</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Awaiting assignment.</div>
-            <div className="btns">
-              <Link to="/agents/bdm" className="btn btn-primary">💬 DM Casey</Link>
-            </div>
-          </div>
-
-          <div className="a-card">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#fef3c7' }}>✉️</div>
-              <div>
-                <h3>Marcus</h3>
-                <div className="role">Outreach Specialist</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Awaiting assignment.</div>
-            <div className="btns">
-              <Link to="/agents/marcus" className="btn btn-primary">💬 DM Marcus</Link>
-            </div>
-          </div>
-
-          <div className="a-card">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#fff7ed' }}>⚙️</div>
-              <div>
-                <h3>Devon</h3>
-                <div className="role">Implementation</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Awaiting assignment.</div>
-            <div className="btns">
-              <Link to="/agents/devon" className="btn btn-primary">💬 DM Devon</Link>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* IDLE */}
-        <div className="sec-label idle">💤 On standby — ready when needed <span className="count">3</span></div>
-
+        <div className="sec-label idle">💤 On standby — ready when needed <span className="count">{standbyAgents.length}</span></div>
         <div className="grid-agents">
-          <div className="a-card idle">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#ede9fe' }}>🎨</div>
-              <div>
-                <h3 style={{ color: 'var(--text-2)' }}>Priya</h3>
-                <div className="role">Designer</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Finished deck rebuild yesterday. Ready for next assignment.</div>
-            <div className="btns">
-              <Link to="/agents/design" className="btn btn-ghost">💬 DM Priya</Link>
-              <button className="btn btn-ghost" onClick={() => alert('Task assignment module coming in v2.')}>Assign task</button>
-            </div>
-          </div>
-
-          <div className="a-card idle">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#d1fae5' }}>📊</div>
-              <div>
-                <h3 style={{ color: 'var(--text-2)' }}>Riley</h3>
-                <div className="role">Data Analyst</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Weekly report shipped. Next report scheduled Monday.</div>
-            <div className="btns">
-              <Link to="/agents/data" className="btn btn-ghost">💬 DM Riley</Link>
-              <Link to="/agents/data" className="btn btn-ghost">Ask question</Link>
-            </div>
-          </div>
-
-          <div className="a-card idle">
-            <div className="head">
-              <div className="role-icon" style={{ background: '#fee2e2' }}>🔬</div>
-              <div>
-                <h3 style={{ color: 'var(--text-2)' }}>Quinn <span className="new-pill">NEW</span></h3>
-                <div className="role">Research Analyst</div>
-              </div>
-              <span className="status status-idle">💤 Idle</span>
-            </div>
-            <div className="task">Bring in for competitor teardowns, market sizing, category trends.</div>
-            <div className="btns">
-              <Link to="/agents/quinn" className="btn btn-ghost">💬 DM Quinn</Link>
-              <button className="btn btn-ghost" onClick={() => alert('Agent activation requires approval from Alex (CMO).')}>Activate</button>
-            </div>
-          </div>
+          {standbyAgents.map(agent => renderAgentCard(agent, true))}
         </div>
-
-
 
       </div>
     </>

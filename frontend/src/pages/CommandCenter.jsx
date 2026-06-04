@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './CommandCenter.css';
+import io from 'socket.io-client';
 
 export default function CommandCenter() {
   const { setSidebarOpen } = useOutletContext();
@@ -9,7 +10,8 @@ export default function CommandCenter() {
 
   const [stats, setStats] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const { workspace, activeProductId } = useAuth();
+  const [refreshDashboard, setRefreshDashboard] = useState(0);
+  const { user, workspace, activeProductId } = useAuth();
 
   useEffect(() => {
     if (!workspace) return;
@@ -32,6 +34,23 @@ export default function CommandCenter() {
       }
     };
     fetchDashboardData();
+  }, [workspace, activeProductId, refreshDashboard]);
+
+  // Connect WebSocket for task updates
+  useEffect(() => {
+    if (!workspace) return;
+    
+    const socket = io('http://localhost:5000');
+    socket.emit('join_workspace', workspace.id);
+
+    socket.on('tasks_updated', (payload) => {
+      if (activeProductId && payload.productId && payload.productId !== activeProductId) return;
+      setRefreshDashboard(prev => prev + 1);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [workspace, activeProductId]);
 
   const approve = async (taskId) => {
@@ -48,14 +67,22 @@ export default function CommandCenter() {
       console.error(err);
     }
   };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   return (
     <>
       <div className="topbar">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button className="hamburger" onClick={() => setSidebarOpen(true)}>☰</button>
           <div>
-            <div className="crumb">Workspace › Command Center</div>
-            <div className="title">Good morning, Sam</div>
+            <div className="crumb">Workspace › Dashboard</div>
+            <div className="title">{getGreeting()}, {user?.name ? user.name.split(' ')[0] : 'Founder'}</div>
           </div>
         </div>
         <div className="actions">
@@ -117,19 +144,26 @@ export default function CommandCenter() {
                 <Link to="/approvals" className="btn btn-ghost btn-sm">See all →</Link>
               </div>
 
-              {tasks.length === 0 ? (
+              {tasks.filter(t => t.status === 'pending' || t.status === 'completed' || t.status === 'reviewing' || t.status === 'revising').length === 0 ? (
                 <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-3)' }}>No pending approvals.</div>
-              ) : tasks.map(task => (
+              ) : tasks.filter(t => t.status === 'pending' || t.status === 'completed' || t.status === 'reviewing' || t.status === 'revising').slice(0, 3).map(task => (
                 <div className="approval-item" key={task.id}>
                   <div className="preview" style={{ background: 'var(--magenta-soft)', color: 'var(--magenta)' }}>📝</div>
                   <div className="info">
-                    <div className="title">{task.description}</div>
+                    <div className="title">{task.description || task.title}</div>
                     <div className="meta">By {task.agentId.toUpperCase()} · {new Date(task.createdAt).toLocaleDateString()}</div>
                   </div>
                   <div className="btns">
-                    {task.status === 'approved'
-                      ? <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: '12px' }}>✓ Approved</span>
-                      : <button className="btn btn-success btn-sm" onClick={() => approve(task.id)}>Approve</button>}
+                    <button 
+                      className="btn btn-success btn-sm" 
+                      onClick={() => approve(task.id)}
+                      disabled={task.status !== 'completed'}
+                    >
+                      {task.status === 'pending' ? '⏳ Generating...' 
+                        : task.status === 'reviewing' ? '👀 CMO Reviewing...' 
+                        : task.status === 'revising' ? '✍️ Agent Revising...' 
+                        : 'Approve'}
+                    </button>
                   </div>
                 </div>
               ))}

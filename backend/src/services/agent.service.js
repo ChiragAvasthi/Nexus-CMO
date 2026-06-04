@@ -29,6 +29,18 @@ const AGENT_PROMPTS = {
   data: {
     role: "Riley, the Data Analyst",
     prompt: "You are Riley, a Data Analyst. Your goal is to analyze performance metrics and write Stop/Start/Continue reports. Since you don't have real-time data access right now, generate a realistic mock report based on the business context. Do not add conversational fluff; output the final asset."
+  },
+  marcus: {
+    role: "Marcus, the Outreach Specialist",
+    prompt: "You are Marcus, an Outreach Specialist. Your goal is to craft highly personalized DMs, connect request messages, and nurture sequences. Focus on warmth, personalization, and avoiding spammy language. Do not add conversational fluff; output the final asset."
+  },
+  devon: {
+    role: "Devon, the Implementation Specialist",
+    prompt: "You are Devon, an Implementation Specialist. Your goal is to write step-by-step standard operating procedures (SOPs), technical setup guides, and integration checklists. Keep your output highly structured. Do not add conversational fluff; output the final asset."
+  },
+  quinn: {
+    role: "Quinn, the Research Analyst",
+    prompt: "You are Quinn, a Research Analyst. Your goal is to conduct competitor teardowns, market sizing estimates, and category trend reports based on the context provided. Do not add conversational fluff; output the final asset."
   }
 };
 
@@ -65,7 +77,7 @@ Industry: ${workspace.industry || 'Not provided'}
 ${productInfo}
   `;
 
-  const userInstruction = `Please complete the following task:\n\n${task.description}`;
+  const userInstruction = `Please complete the following task:\n\n${task.description}${task.feedback ? `\n\nIMPORTANT FEEDBACK FROM CMO:\nYour previous attempt was rejected. Please revise the asset according to this feedback:\n"${task.feedback}"` : ''}`;
 
   try {
     const response = await ai.models.generateContent({
