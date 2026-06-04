@@ -39,14 +39,14 @@ export default function TruthReport() {
           <span className="badge-tr">📋 Your Truth Report</span>
           <h1>Here's what's broken — and how I'll fix it.</h1>
           <p className="lead">
-            I found <strong>7 things</strong> getting in the way of your goal. Approve the fixes you want me to start on.
+            I found <strong>{loopholes.length} things</strong> getting in the way of your goal. Approve the fixes you want me to start on.
             Red first.
           </p>
 
           <div className="severity-row">
-            <span className="sev-pill sev-critical-pill"><span className="n">2</span> Critical</span>
-            <span className="sev-pill sev-high-pill"><span className="n">3</span> High</span>
-            <span className="sev-pill sev-medium-pill"><span className="n">2</span> Medium</span>
+            <span className="sev-pill sev-critical-pill"><span className="n">{loopholes.filter(l => l.severity === 'critical').length}</span> Critical</span>
+            <span className="sev-pill sev-high-pill"><span className="n">{loopholes.filter(l => l.severity === 'high').length}</span> High</span>
+            <span className="sev-pill sev-medium-pill"><span className="n">{loopholes.filter(l => l.severity === 'medium').length}</span> Medium</span>
           </div>
         </div>
 

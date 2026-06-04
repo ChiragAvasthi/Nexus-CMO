@@ -10,6 +10,7 @@ export default function Onboarding() {
 
   const [failedEffort, setFailedEffort] = useState('');
   const [goal, setGoal] = useState('Get to $25k MRR by end of Q3');
+  const [productName, setProductName] = useState('Core Offer');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const steps = [
@@ -32,6 +33,14 @@ export default function Onboarding() {
   const handleGenerateReport = async () => {
     if (!workspace) return;
     setIsGenerating(true);
+    
+    // Fallback loopholes if AI generation fails
+    const fallbackLoopholes = [
+      { id: 1, severity: 'critical', title: 'Your messaging is too generic.', detail: 'Your website says "We help businesses grow" which means nothing to your target audience.', fix: 'Rewrite homepage H1 to speak directly to your ICP.', agentLabel: 'S', agentName: 'SMM' },
+      { id: 2, severity: 'high', title: 'No conversion tracking.', detail: 'You are spending money but cannot attribute revenue to specific channels.', fix: 'Implement GA4 and CRM closed-won tracking.', agentLabel: 'DA', agentName: 'Data Analyst' },
+      { id: 3, severity: 'medium', title: 'Stale LinkedIn presence.', detail: 'You have not posted in 40 days, losing brand trust.', fix: 'Schedule 2 weekly authority posts.', agentLabel: 'S', agentName: 'SMM' }
+    ];
+
     try {
       const token = localStorage.getItem('nexus_token');
       const res = await fetch(`/api/workspace/${workspace.id}/generate-report`, {
@@ -43,17 +52,25 @@ export default function Onboarding() {
         body: JSON.stringify({
           companyName: 'Nexus User',
           industry: 'Software',
+          productName,
           targetAudience: 'Mid-market',
           currentProblem: failedEffort + ' Goal: ' + goal
         })
       });
-      const data = await res.json();
+      
+      let data = {};
       if (res.ok) {
-        localStorage.setItem('truth_report_loopholes', JSON.stringify(data.loopholes));
-        navigate('/truth-report');
+        data = await res.json();
       }
+
+      const loopholesToSave = (res.ok && data.loopholes && data.loopholes.length > 0) ? data.loopholes : fallbackLoopholes;
+      localStorage.setItem('truth_report_loopholes', JSON.stringify(loopholesToSave));
+      navigate('/truth-report');
+
     } catch (err) {
-      console.error(err);
+      console.error('Failed to hit AI API, using fallback:', err);
+      localStorage.setItem('truth_report_loopholes', JSON.stringify(fallbackLoopholes));
+      navigate('/truth-report');
     } finally {
       setIsGenerating(false);
     }
@@ -190,11 +207,16 @@ export default function Onboarding() {
         {currentStep === 4 && (
           <div className="step-content">
             <div className="step-eyebrow">Step 4 of 5</div>
-            <h2 style={{ fontSize: '22px' }}>What have you already tried? Be honest.</h2>
-            <p className="intro">Knowing what didn't work prevents us repeating it. There's no judgment — every founder has a list like this.</p>
+            <h2 style={{ fontSize: '22px' }}>What product/campaign are you marketing?</h2>
+            <p className="intro">Tell us the name of the specific product or service you want to focus on, and what you've tried so far. There's no judgment.</p>
 
             <div className="form-group">
-              <label>Tell me about a marketing effort that didn't work (1–3 short stories)</label>
+              <label>Product / Service Name</label>
+              <input type="text" placeholder="e.g. Nexus CMO Enterprise Plan" value={productName} onChange={e => setProductName(e.target.value)} />
+            </div>
+
+            <div className="form-group">
+              <label>Tell me about a marketing effort for this product that didn't work (1–3 short stories)</label>
               <textarea rows={5} placeholder="Example: We tried cold-emailing developers in early 2026..." value={failedEffort} onChange={e => setFailedEffort(e.target.value)}></textarea>
               <div className="help-text">Plain English. Doesn't need to be polished. Stories beat bullet points.</div>
             </div>

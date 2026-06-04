@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Signup.css';
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    if (e) e.preventDefault();
     setError(null);
     try {
       const res = await fetch('/api/auth/register', {
@@ -20,8 +23,7 @@ export default function Signup() {
       const data = await res.json();
       
       if (res.ok) {
-        localStorage.setItem('nexus_token', data.token);
-        navigate('/command-center');
+        login(data.token, data.user, data.workspace, data.workspaces);
       } else {
         setError(data.error || 'Registration failed');
       }
@@ -61,33 +63,35 @@ export default function Signup() {
 
           {error && <div style={{ color: 'var(--red)', fontSize: '14px', marginBottom: '10px' }}>{error}</div>}
 
-          <div className="form-group">
-            <label>Full Name</label>
-            <input type="text" placeholder="Sam Altman" value={name} onChange={e => setName(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label>Work email</label>
-            <input type="email" placeholder="you@yourcompany.com" value={email} onChange={e => setEmail(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label>Password <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(min 8 characters)</span></label>
-            <input type="password" placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} />
-          </div>
+          <form onSubmit={handleRegister}>
+            <div className="form-group">
+              <label>Full Name</label>
+              <input type="text" placeholder="Sam Altman" value={name} onChange={e => setName(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>Work email</label>
+              <input type="email" placeholder="you@yourcompany.com" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>Password <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(min 8 characters)</span></label>
+              <input type="password" placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
+            </div>
 
-          <button 
-            className="btn btn-primary btn-lg" 
-            style={{ width: '100%', justifyContent: 'center' }}
-            onClick={handleRegister}
-          >
-            Create my account → See my Truth Report
-          </button>
+            <button 
+              type="submit"
+              className="btn btn-primary btn-lg" 
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              Create my account → See my Truth Report
+            </button>
+          </form>
 
           <p className="legal">
             No credit card required. 14-day free trial.<br />
             By signing up you agree to our <a>Terms</a> and <a>Privacy Policy</a>.
           </p>
 
-          <div className="switch-link">Already have an account? <a>Sign in</a></div>
+          <div className="switch-link">Already have an account? <Link to="/login">Sign in</Link></div>
         </div>
 
         <div className="signup-right">

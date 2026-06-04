@@ -1,45 +1,132 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import io from 'socket.io-client';
 import './AgentChat.css';
 
-const quinnResponses = [
-  "Let me dig into that. I’ll have a brief ready in about 10 minutes — check the Briefs tab.",
-  "Good question. I just scraped their latest pricing page and found something interesting. Give me a minute to format the findings.",
-  "I’ve seen this pattern before. Let me pull 3 comparable companies and show you what they did differently.",
-  "On it. I’ll cross-reference this with the market data I already have and flag anything unusual.",
-  "Noted — I’ll add this to the active competitor teardown. You’ll see it in the results.",
-];
+const agents = {
+  smm: { name: 'Jordan', role: 'SMM Specialist', icon: '📣', bg: '#fce7f3' },
+  seo: { name: 'Maya', role: 'SEO Architect', icon: '🔍', bg: '#cffafe' },
+  bdm: { name: 'Casey', role: 'Growth BDM', icon: '🧭', bg: '#ccfbf1' },
+  design: { name: 'Priya', role: 'Designer', icon: '🎨', bg: '#ede9fe' },
+  data: { name: 'Riley', role: 'Data Analyst', icon: '📊', bg: '#d1fae5' },
+  cmo: { name: 'Alex', role: 'CMO', icon: '🎯', bg: '#fef08a' }
+};
 
 export default function AgentChat() {
   const { setSidebarOpen } = useOutletContext();
+  const { agentId } = useParams();
+  const { workspace } = useAuth();
   const [activeTab, setActiveTab] = useState('chat');
-  const [expandedTasks, setExpandedTasks] = useState({});
-  const [extraMessages, setExtraMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const socketRef = useRef(null);
+
+  const agent = agents[agentId] || { name: agentId, role: 'Specialist', icon: '🤖', bg: '#e5e7eb' };
+
+  // Fetch Chat History
+  useEffect(() => {
+    if (!workspace) return;
+    const fetchMessages = async () => {
+      try {
+        const token = localStorage.getItem('nexus_token');
+        let url = `/api/workspace/${workspace.id}/messages?agentId=${agentId}`;
+        if (activeProductId) url += `&productId=${activeProductId}`;
+        
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMessages(data.map(m => ({
+            type: m.sender,
+            text: m.content,
+            time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          })));
+        }
+      } catch (err) {
+        console.error('Failed to fetch messages', err);
+      }
+    };
+    fetchMessages();
+  }, [workspace, agentId, activeProductId]);
+
+  // Fetch Agent Tasks
+  useEffect(() => {
+    if (!workspace) return;
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem('nexus_token');
+        let url = `/api/workspace/${workspace.id}/tasks`;
+        if (activeProductId) url += `?productId=${activeProductId}`;
+        
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Filter tasks specifically for this agent
+          setTasks(data.filter(t => t.agentId === agentId || t.type === agentId));
+        }
+      } catch (err) {
+        console.error('Failed to fetch tasks', err);
+      }
+    };
+    fetchTasks();
+  }, [workspace, agentId, activeProductId]);
+
+  // Connect WebSocket
+  useEffect(() => {
+    if (!workspace) return;
+    
+    socketRef.current = io('http://localhost:5000');
+    socketRef.current.emit('join_workspace', workspace.id);
+
+    socketRef.current.on('new_message', (msg) => {
+      if (msg.agentId !== agentId && msg.agentId !== undefined) return; // ignore other agents
+      if (activeProductId && msg.productId && msg.productId !== activeProductId) return; // ignore other products
+      
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        type: msg.sender,
+        text: msg.content,
+        time: msg.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [workspace, agentId, activeProductId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [extraMessages]);
+  }, [messages, isTyping]);
 
   const sendChat = () => {
     const text = chatInput.trim();
-    if (!text) return;
-    setExtraMessages(prev => [...prev, { type: 'user', text }]);
+    if (!text || !workspace) return;
+    
+    const userMsg = { type: 'user', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+    setMessages(prev => [...prev, userMsg]);
     setChatInput('');
     setIsTyping(true);
-    setTimeout(() => {
-      const resp = quinnResponses[Math.floor(Math.random() * quinnResponses.length)];
-      setExtraMessages(prev => [...prev, { type: 'agent', text: resp }]);
-      setIsTyping(false);
-    }, 1600);
+
+    socketRef.current.emit('send_message', {
+      workspaceId: workspace.id,
+      productId: activeProductId,
+      agentId: agentId,
+      sender: 'user',
+      content: text,
+      time: userMsg.time
+    });
   };
 
-
-  const toggleTask = (id) => {
-    setExpandedTasks(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  const activeTasks = tasks.filter(t => t.status === 'pending');
+  const doneTasks = tasks.filter(t => t.status === 'live' || t.status === 'approved' || t.status === 'archived');
 
   return (
     <>
@@ -47,105 +134,81 @@ export default function AgentChat() {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button className="hamburger" onClick={() => setSidebarOpen(true)}>☰</button>
           <div>
-            <div className="crumb">Workspace › <Link to="/team" style={{ color: 'inherit', textDecoration: 'none' }}>Your AI Team</Link> › Quinn</div>
-            <div className="title">Talk to Quinn</div>
+            <div className="crumb">Workspace › <Link to="/team" style={{ color: 'inherit', textDecoration: 'none' }}>Your AI Team</Link> › {agent.name}</div>
+            <div className="title">Talk to {agent.name}</div>
           </div>
         </div>
-      </div>
-
-      {/* Agent switcher */}
-      <div className="agent-switcher">
-        <span className="chip"><span className="role-emoji">🔍</span> Maya</span>
-        <span className="chip"><span className="role-emoji">📣</span> Jordan</span>
-        <span className="chip"><span className="role-emoji">🧭</span> Casey</span>
-        <span className="chip"><span className="role-emoji">✉️</span> Marcus</span>
-        <span className="chip"><span className="role-emoji">🎨</span> Priya</span>
-        <span className="chip"><span className="role-emoji">⚙️</span> Devon</span>
-        <span className="chip"><span className="role-emoji">📊</span> Riley</span>
-        <span className="chip active"><span className="role-emoji">🔬</span> Quinn</span>
       </div>
 
       <div className="agent-wrap">
         {/* SUMMARY CARD */}
         <div className="summary-card">
           <div className="head">
-            <div className="role-icon-big">🔬</div>
+            <div className="role-icon-big">{agent.icon}</div>
             <div>
-              <h1>Quinn <span className="new">NEW</span></h1>
-              <div className="role-line"><strong>Research Analyst</strong> &middot; competitive intel &amp; market research</div>
+              <h1>{agent.name}</h1>
+              <div className="role-line"><strong>{agent.role}</strong></div>
             </div>
           </div>
-          <div className="what-i-do"><strong>What I do:</strong> Research competitors, markets, and customers — turn it into briefs the team can act on.</div>
+          <div className="what-i-do"><strong>Status:</strong> {activeTasks.length > 0 ? 'Working on assigned tasks.' : 'Idle — waiting for assignments from you or the CMO.'}</div>
           <div className="stats-row">
-            <div className="stat" onClick={() => setActiveTab('active')}><div className="v">1</div><div className="l">Active</div></div>
-            <div className="stat" onClick={() => setActiveTab('done')}><div className="v">8</div><div className="l">Done</div></div>
-            <div className="stat" onClick={() => setActiveTab('briefs')}><div className="v">12</div><div className="l">Briefs</div></div>
+            <div className="stat" onClick={() => setActiveTab('active')}><div className="v">{activeTasks.length}</div><div className="l">Active</div></div>
+            <div className="stat" onClick={() => setActiveTab('done')}><div className="v">{doneTasks.length}</div><div className="l">Done</div></div>
+            <div className="stat" onClick={() => setActiveTab('briefs')}><div className="v">0</div><div className="l">Briefs</div></div>
           </div>
         </div>
 
         {/* TABS */}
         <div className="agent-tabs">
           <button className={`tab ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>💬 Chat</button>
-          <button className={`tab ${activeTab === 'active' ? 'active' : ''}`} onClick={() => setActiveTab('active')}>⚡ Active <span className="count">1</span></button>
-          <button className={`tab ${activeTab === 'done' ? 'active' : ''}`} onClick={() => setActiveTab('done')}>✓ Done <span className="count">8</span></button>
-          <button className={`tab ${activeTab === 'briefs' ? 'active' : ''}`} onClick={() => setActiveTab('briefs')}>🗂 Briefs <span className="count">12</span></button>
+          <button className={`tab ${activeTab === 'active' ? 'active' : ''}`} onClick={() => setActiveTab('active')}>⚡ Active <span className="count">{activeTasks.length}</span></button>
+          <button className={`tab ${activeTab === 'done' ? 'active' : ''}`} onClick={() => setActiveTab('done')}>✓ Done <span className="count">{doneTasks.length}</span></button>
+          <button className={`tab ${activeTab === 'briefs' ? 'active' : ''}`} onClick={() => setActiveTab('briefs')}>🗂 Briefs <span className="count">0</span></button>
         </div>
 
         {/* TAB 1: CHAT */}
         {activeTab === 'chat' && (
           <div>
-            <div className="section-h">💬 Chat with Quinn</div>
-            <div className="section-sub">Ask Quinn for any research — competitor teardowns, market sizing, customer intel.</div>
+            <div className="section-h">💬 Chat with {agent.name}</div>
+            <div className="section-sub">Send a message to assign a task directly.</div>
 
             <div className="chat-card">
-              <div className="chat-msg user">
-                <div className="bubble">Quinn — who are our top 3 competitors and what are they doing differently?</div>
-              </div>
-              <div className="chat-msg agent">
-                <div className="ic">🔬</div>
-                <div className="bubble">
-                  Your top 3 (by share of organic voice):<br /><br />
-                  <strong>1. Linear Ops</strong> — leads with "21-day cycle" outcome<br />
-                  <strong>2. RevHQ</strong> — pricing transparency &amp; calculator<br />
-                  <strong>3. PulseRev</strong> — heavy LinkedIn content (8 posts/wk)<br /><br />
-                  Want the full teardown? See the <strong>Active tab</strong> — I started it just now.
-                </div>
-              </div>
-              <div className="chat-msg user">
-                <div className="bubble">Yes — keep going.</div>
-              </div>
-
-              {/* Dynamic extra messages */}
-              {extraMessages.map((msg, i) => (
-                msg.type === 'user' ? (
-                  <div className="chat-msg user" key={`ex-${i}`}>
-                    <div className="bubble">{msg.text}</div>
-                  </div>
-                ) : (
-                  <div className="chat-msg agent" key={`ex-${i}`}>
-                    <div className="ic">🔬</div>
-                    <div className="bubble">{msg.text}</div>
-                  </div>
-                )
-              ))}
+              {messages.length === 0 ? (
+                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-3)' }}>No messages yet. Say hello!</div>
+              ) : (
+                messages.map((msg, i) => (
+                  msg.type === 'user' ? (
+                    <div className="chat-msg user" key={`msg-${i}`}>
+                      <div className="bubble">{msg.text}</div>
+                    </div>
+                  ) : (
+                    <div className="chat-msg agent" key={`msg-${i}`}>
+                      <div className="ic">{agent.icon}</div>
+                      <div className="bubble" dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br/>') }}></div>
+                    </div>
+                  )
+                ))
+              )}
               
               {isTyping && (
                 <div className="chat-msg agent">
-                  <div className="ic">🔬</div>
-                  <div className="typing-indicator"><span></span><span></span><span></span></div>
+                  <div className="ic">{agent.icon}</div>
+                  <div className="bubble typing">
+                    <span className="dot"></span><span className="dot"></span><span className="dot"></span>
+                  </div>
                 </div>
               )}
+              
               <div ref={chatEndRef} />
 
               <div className="agent-composer">
                 <textarea
-                  placeholder="Ask Quinn — research, competitor teardowns, market sizing…"
+                  placeholder={`Ask ${agent.name}...`}
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } }}
                 ></textarea>
                 <div className="actions">
-                  <span className="hint">Quinn shares output in the Briefs tab when done</span>
                   <button className="send-btn" onClick={sendChat}>Send →</button>
                 </div>
               </div>
@@ -156,163 +219,52 @@ export default function AgentChat() {
         {/* TAB 2: ACTIVE */}
         {activeTab === 'active' && (
           <div>
-            <div className="section-h">⚡ Active tasks &middot; <span style={{ color: '#dc2626' }}>1 running</span></div>
-            <div className="section-sub">Click any task to see its current progress and partial output.</div>
-
-            <div className={`task-row active ${expandedTasks['t1'] ? 'expanded' : ''}`} onClick={() => toggleTask('t1')}>
-              <div className="head">
-                <div className="ic-tiny">●</div>
-                <div className="body">
-                  <h3>Full competitor teardown — top 3</h3>
-                  <div className="meta">Started 2 min ago &middot; ETA 10 min &middot; You asked for this</div>
-                  <div className="task-progress"><span style={{ width: '22%' }}></span></div>
-                </div>
-                <div className="expand-arrow">▶</div>
+            <div className="section-h">⚡ Active tasks</div>
+            {activeTasks.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)', background: 'white', borderRadius: '12px', border: '1px solid var(--border-1)' }}>
+                No active tasks right now.
               </div>
-              <div className="task-result" onClick={e => e.stopPropagation()}>
-                <div className="result-label">Partial output (so far)</div>
-                <h4>Linear Ops &middot; scraped homepage + pricing + 12 LinkedIn posts</h4>
-                <p><strong>Positioning:</strong> "Cut your sales cycle by 21 days." Big number lead. Outcome-led.</p>
-                <p><strong>Pricing:</strong> Starts at $499/seat/mo &middot; 3-tier (Starter / Growth / Enterprise) &middot; transparent on landing page</p>
-                <p><strong>Content cadence:</strong> 4 LinkedIn posts/wk, founder-led. 1 blog/wk. Active Reddit presence in r/sales.</p>
-                <div className="stat-row">
-                  <div className="stat"><div className="v">$499</div><div className="l">Starter / seat</div></div>
-                  <div className="stat"><div className="v">21d</div><div className="l">Cycle claim</div></div>
-                  <div className="stat"><div className="v">4/wk</div><div className="l">LinkedIn posts</div></div>
-                </div>
-                <p style={{ fontSize: '12px', color: 'var(--text-3)', fontStyle: 'italic' }}>Working on RevHQ next, then PulseRev. Final brief will land in the Briefs tab.</p>
-                <div className="actions">
-                  <button className="btn btn-ghost btn-sm">⏸ Pause</button>
-                  <button className="btn btn-ghost btn-sm">Add follow-up</button>
-                </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {activeTasks.map(t => (
+                  <div key={t.id} style={{ padding: '15px', background: 'white', borderRadius: '8px', border: '1px solid var(--border-1)' }}>
+                    <strong>{t.title || 'Task'}</strong>
+                    <div style={{ color: 'var(--text-2)', fontSize: '14px', marginTop: '5px' }}>{t.content || t.description || 'Pending execution...'}</div>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {/* TAB 3: DONE */}
         {activeTab === 'done' && (
           <div>
-            <div className="section-h">✓ Done &middot; <span style={{ color: 'var(--green)' }}>8 completed</span></div>
-            <div className="section-sub">Click any task to see the result Quinn delivered.</div>
-
-            <div className={`task-row done ${expandedTasks['t2'] ? 'expanded' : ''}`} onClick={() => toggleTask('t2')}>
-              <div className="head">
-                <div className="ic-tiny">✓</div>
-                <div className="body">
-                  <h3>Market size analysis (TAM/SAM/SOM)</h3>
-                  <div className="meta">Yesterday &middot; 18 min &middot; Used by Casey for targeting</div>
-                </div>
-                <div className="expand-arrow">▶</div>
+            <div className="section-h">✓ Done</div>
+            {doneTasks.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)', background: 'white', borderRadius: '12px', border: '1px solid var(--border-1)' }}>
+                No completed tasks yet.
               </div>
-              <div className="task-result" style={{ borderLeftColor: 'var(--green)', background: '#f0fdf4' }} onClick={e => e.stopPropagation()}>
-                <div className="result-label" style={{ color: 'var(--green)' }}>Result</div>
-                <h4>Mid-market RevOps SaaS &middot; TAM &amp; ICP sizing</h4>
-                <div className="stat-row">
-                  <div className="stat"><div className="v">$2.4B</div><div className="l">TAM (global)</div></div>
-                  <div className="stat"><div className="v">$640M</div><div className="l">SAM (NA + EU)</div></div>
-                  <div className="stat"><div className="v">$48M</div><div className="l">SOM (year 1)</div></div>
-                </div>
-                <p><strong>4,247</strong> companies match your ICP (100–500 FTE, SaaS, post-Series-B). <strong>1,820</strong> of those are in your reachable geo.</p>
-                <div className="actions">
-                  <button className="btn btn-primary btn-sm">View full report</button>
-                  <button className="btn btn-ghost btn-sm">📥 Download CSV</button>
-                </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {doneTasks.map(t => (
+                  <div key={t.id} style={{ padding: '15px', background: 'white', borderRadius: '8px', border: '1px solid var(--border-1)' }}>
+                    <strong>{t.title}</strong>
+                    <div style={{ color: 'var(--text-2)', fontSize: '14px', marginTop: '5px' }} dangerouslySetInnerHTML={{ __html: t.content }}></div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            <div className={`task-row done ${expandedTasks['t3'] ? 'expanded' : ''}`} onClick={() => toggleTask('t3')}>
-              <div className="head">
-                <div className="ic-tiny">✓</div>
-                <div className="body">
-                  <h3>Pricing intelligence — top 8 competitors</h3>
-                  <div className="meta">3 days ago &middot; 28 min &middot; Spotted: you're 40% under market</div>
-                </div>
-                <div className="expand-arrow">▶</div>
-              </div>
-              <div className="task-result" style={{ borderLeftColor: 'var(--green)', background: '#f0fdf4' }} onClick={e => e.stopPropagation()}>
-                <div className="result-label" style={{ color: 'var(--green)' }}>Result &middot; ⚠ Action recommended</div>
-                <h4>Your pricing is <strong style={{ color: 'var(--red)' }}>40% below the market median</strong></h4>
-                <table>
-                  <tbody>
-                    <tr style={{ fontWeight: 700, borderBottom: '1px solid var(--border-2)' }}><td>Competitor</td><td>Starter</td><td>Growth</td><td>Enterprise</td></tr>
-                    <tr><td>Linear Ops</td><td>$499</td><td>$899</td><td>Custom</td></tr>
-                    <tr><td>RevHQ</td><td>$399</td><td>$799</td><td>$1,999</td></tr>
-                    <tr><td>PulseRev</td><td>$549</td><td>$999</td><td>Custom</td></tr>
-                    <tr><td>Median (8 cos)</td><td>$485</td><td>$849</td><td>$1,899</td></tr>
-                    <tr style={{ background: '#fee2e2' }}><td><strong>You</strong></td><td><strong>$290</strong></td><td><strong>$490</strong></td><td><strong>$1,100</strong></td></tr>
-                  </tbody>
-                </table>
-                <p style={{ marginTop: '10px' }}><strong>My take:</strong> Test a 30% price increase on new logos. Grandfather existing customers.</p>
-                <div className="actions">
-                  <button className="btn btn-primary btn-sm">Discuss with Alex (CMO)</button>
-                  <button className="btn btn-ghost btn-sm">Full pricing brief</button>
-                </div>
-              </div>
-            </div>
-
-            <p style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: '13px', padding: '12px 0' }}>+ 4 more completed</p>
+            )}
           </div>
         )}
 
         {/* TAB 4: BRIEFS */}
         {activeTab === 'briefs' && (
           <div>
-            <div className="section-h">🗂 Briefs &middot; 12 produced by Quinn</div>
-            <div className="section-sub">Click any brief to preview its contents.</div>
-
-            <div className="briefs-grid">
-              <div className={`brief-card ${expandedTasks['b1'] ? 'expanded' : ''}`} onClick={() => toggleTask('b1')}>
-                <div className="type-pill">Market Sizing</div>
-                <h4>TAM &middot; Mid-Market RevOps SaaS</h4>
-                <div className="meta">Yesterday &middot; $2.4B TAM</div>
-                <div className="brief-content" onClick={e => e.stopPropagation()}>
-                  <strong>Preview</strong>
-                  <ul>
-                    <li>TAM: $2.4B (global)</li>
-                    <li>SAM: $640M (NA + EU)</li>
-                    <li>SOM (Y1): $48M</li>
-                    <li>4,247 target companies &middot; 1,820 reachable</li>
-                  </ul>
-                  <button className="btn btn-primary btn-sm" style={{ marginTop: '6px' }}>Open full brief</button>
-                </div>
-              </div>
-
-              <div className={`brief-card ${expandedTasks['b2'] ? 'expanded' : ''}`} onClick={() => toggleTask('b2')}>
-                <div className="type-pill">Pricing</div>
-                <h4>Pricing intelligence v1</h4>
-                <div className="meta">3 days ago &middot; You're 40% under market</div>
-                <div className="brief-content" onClick={e => e.stopPropagation()}>
-                  <strong>Preview</strong>
-                  <ul>
-                    <li>8 competitors analyzed</li>
-                    <li>Median Starter: $485 &middot; You: $290</li>
-                    <li>Median Growth: $849 &middot; You: $490</li>
-                    <li>Recommendation: test 30% increase on new logos</li>
-                  </ul>
-                  <button className="btn btn-primary btn-sm" style={{ marginTop: '6px' }}>Open full brief</button>
-                </div>
-              </div>
-
-              <div className={`brief-card ${expandedTasks['b3'] ? 'expanded' : ''}`} onClick={() => toggleTask('b3')}>
-                <div className="type-pill">Trends</div>
-                <h4>Q2 2026 RevOps trends</h4>
-                <div className="meta">1 week ago &middot; 14 trends &middot; Maya using</div>
-                <div className="brief-content" onClick={e => e.stopPropagation()}>
-                  <strong>Top 3 of 14</strong>
-                  <ol style={{ marginLeft: '18px' }}>
-                    <li>Consolidation over stitching (4-tool fatigue)</li>
-                    <li>AI-augmented RevOps roles</li>
-                    <li>Outcome-based pricing experiments</li>
-                  </ol>
-                  <button className="btn btn-primary btn-sm" style={{ marginTop: '6px' }}>See all 14</button>
-                </div>
-              </div>
+            <div className="section-h">🗂 Briefs</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-3)', background: 'white', borderRadius: '12px', border: '1px solid var(--border-1)' }}>
+              No briefs generated yet.
             </div>
-
-            <p style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: '13px', padding: '16px 0' }}>
-              + 6 more briefs &middot; <Link to="#" style={{ color: '#dc2626', fontWeight: 700 }}>View all in Asset Library →</Link>
-            </p>
           </div>
         )}
       </div>

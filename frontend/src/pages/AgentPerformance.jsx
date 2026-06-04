@@ -27,13 +27,13 @@ export default function AgentPerformance() {
           <div className="ic-big">🎯</div>
           <div className="info">
             <h2>Alex &middot; CMO <span className="status status-working" style={{ marginLeft: '6px' }}><span className="dot dot-live"></span> Active</span></h2>
-            <div className="desc">Reviewing Jordan's ad variants &middot; 14 decisions this week</div>
+            <div className="desc">Ready to oversee your marketing strategy &middot; 0 decisions this week</div>
           </div>
           <Link to="/war-room" className="btn btn-primary btn-sm">💬 Chat with Alex</Link>
         </div>
 
         {/* WORKING */}
-        <div className="sec-label working">⚡ Working right now <span className="count">5</span></div>
+        <div className="sec-label working">⚡ Working right now <span className="count">0</span></div>
 
         <div className="grid-agents">
           <div className="a-card">
@@ -43,12 +43,11 @@ export default function AgentPerformance() {
                 <h3>Maya</h3>
                 <div className="role">SEO Architect</div>
               </div>
-              <span className="status status-working"><span className="dot dot-live"></span> Working</span>
+              <span className="status status-idle">💤 Idle</span>
             </div>
-            <div className="task">Mapping 12 keywords your competitors rank for.</div>
+            <div className="task">Awaiting assignment.</div>
             <div className="btns">
-              <Link to="/agents/maya" className="btn btn-primary">💬 DM Maya</Link>
-              <Link to="/assets" className="btn btn-ghost">See work</Link>
+              <Link to="/agents/seo" className="btn btn-primary">💬 DM Maya</Link>
             </div>
           </div>
 
@@ -59,12 +58,11 @@ export default function AgentPerformance() {
                 <h3>Jordan</h3>
                 <div className="role">SMM Specialist</div>
               </div>
-              <span className="status status-working"><span className="dot dot-live"></span> Working</span>
+              <span className="status status-idle">💤 Idle</span>
             </div>
-            <div className="task">Writing 3 ad variants for Campaign A-2.</div>
+            <div className="task">Awaiting assignment.</div>
             <div className="btns">
-              <Link to="/agents/jordan" className="btn btn-primary">💬 DM Jordan</Link>
-              <Link to="/approvals" className="btn btn-ghost">See work</Link>
+              <Link to="/agents/smm" className="btn btn-primary">💬 DM Jordan</Link>
             </div>
           </div>
 
@@ -75,12 +73,11 @@ export default function AgentPerformance() {
                 <h3>Casey</h3>
                 <div className="role">Lead Scout</div>
               </div>
-              <span className="status status-working"><span className="dot dot-live"></span> Working</span>
+              <span className="status status-idle">💤 Idle</span>
             </div>
-            <div className="task">Sourcing 200 GMs at Texas car dealerships. 146/200.</div>
+            <div className="task">Awaiting assignment.</div>
             <div className="btns">
-              <Link to="/agents/casey" className="btn btn-primary">💬 DM Casey</Link>
-              <Link to="/assets" className="btn btn-ghost">See list</Link>
+              <Link to="/agents/bdm" className="btn btn-primary">💬 DM Casey</Link>
             </div>
           </div>
 
@@ -91,12 +88,11 @@ export default function AgentPerformance() {
                 <h3>Marcus</h3>
                 <div className="role">Outreach Specialist</div>
               </div>
-              <span className="status status-working"><span className="dot dot-live"></span> Working</span>
+              <span className="status status-idle">💤 Idle</span>
             </div>
-            <div className="task">Drafting 4-email sequence. Warming sender domain.</div>
+            <div className="task">Awaiting assignment.</div>
             <div className="btns">
               <Link to="/agents/marcus" className="btn btn-primary">💬 DM Marcus</Link>
-              <Link to="/assets" className="btn btn-ghost">See work</Link>
             </div>
           </div>
 
@@ -107,12 +103,11 @@ export default function AgentPerformance() {
                 <h3>Devon</h3>
                 <div className="role">Implementation</div>
               </div>
-              <span className="status status-working"><span className="dot dot-live"></span> Working</span>
+              <span className="status status-idle">💤 Idle</span>
             </div>
-            <div className="task">Installing GA4 conversion tracking on your site.</div>
+            <div className="task">Awaiting assignment.</div>
             <div className="btns">
               <Link to="/agents/devon" className="btn btn-primary">💬 DM Devon</Link>
-              <button className="btn btn-ghost" onClick={() => alert('Installation status visible in Command Center KPIs.')}>See work</button>
             </div>
           </div>
         </div>
@@ -132,7 +127,7 @@ export default function AgentPerformance() {
             </div>
             <div className="task">Finished deck rebuild yesterday. Ready for next assignment.</div>
             <div className="btns">
-              <Link to="/agents/priya" className="btn btn-ghost">💬 DM Priya</Link>
+              <Link to="/agents/design" className="btn btn-ghost">💬 DM Priya</Link>
               <button className="btn btn-ghost" onClick={() => alert('Task assignment module coming in v2.')}>Assign task</button>
             </div>
           </div>
@@ -148,8 +143,8 @@ export default function AgentPerformance() {
             </div>
             <div className="task">Weekly report shipped. Next report scheduled Monday.</div>
             <div className="btns">
-              <Link to="/agents/riley" className="btn btn-ghost">💬 DM Riley</Link>
-              <Link to="/agents/riley" className="btn btn-ghost">Ask question</Link>
+              <Link to="/agents/data" className="btn btn-ghost">💬 DM Riley</Link>
+              <Link to="/agents/data" className="btn btn-ghost">Ask question</Link>
             </div>
           </div>
 

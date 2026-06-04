@@ -6,7 +6,8 @@ export const getTasks = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Verify the workspace belongs to the user
+    const { productId } = req.query;
+
     const workspace = await prisma.workspace.findFirst({
       where: {
         id,
@@ -18,8 +19,13 @@ export const getTasks = async (req, res) => {
       return res.status(404).json({ error: 'Workspace not found' });
     }
 
-    const tasks = await prisma.task.findMany({
-      where: { workspaceId: id },
+    const whereClause = { workspaceId: id };
+    if (productId) {
+      whereClause.productId = productId;
+    }
+
+    const tasks = await prisma.asset.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' }
     });
 
@@ -34,10 +40,10 @@ export const approveTask = async (req, res) => {
   try {
     const { taskId } = req.params;
 
-    // A real app would check if the user has permission to approve this specific task
-    const task = await prisma.task.update({
+    // Approving the asset makes it 'live' and available in the Asset Library
+    const task = await prisma.asset.update({
       where: { id: taskId },
-      data: { status: 'approved' }
+      data: { status: 'live' }
     });
 
     res.json(task);

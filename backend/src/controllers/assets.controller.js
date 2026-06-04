@@ -15,10 +15,26 @@ export const getAssets = async (req, res) => {
       return res.status(404).json({ error: 'Workspace not found' });
     }
 
-    const workspaceId = user.workspaces[0].id;
+    let workspaceId = req.query.workspaceId;
+    let productId = req.query.productId;
+
+    if (!workspaceId) {
+      workspaceId = user.workspaces[0].id;
+    } else {
+      // Verify user owns this workspace
+      const ownsWorkspace = user.workspaces.some(w => w.id === workspaceId);
+      if (!ownsWorkspace) {
+        return res.status(403).json({ error: 'Unauthorized access to workspace' });
+      }
+    }
+
+    const whereClause = { workspaceId };
+    if (productId) {
+      whereClause.productId = productId;
+    }
 
     const assets = await prisma.asset.findMany({
-      where: { workspaceId },
+      where: whereClause,
       orderBy: { createdAt: 'desc' }
     });
 

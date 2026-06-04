@@ -13,6 +13,7 @@ import TruthReport from './pages/TruthReport';
 import WarRoom from './pages/WarRoom';
 import AgentChat from './pages/AgentChat';
 import AssetLibrary from './pages/AssetLibrary';
+import Settings from './pages/Settings';
 import AuthCallback from './pages/AuthCallback';
 import NotFound from './pages/NotFound';
 import './mobile.css';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/assets" element={<AssetLibrary />} />
             <Route path="/approvals" element={<ApprovalQueue />} />
             <Route path="/agents/:agentId" element={<AgentChat />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

@@ -44,7 +44,8 @@ export const register = async (req, res) => {
         email: user.email,
         name: user.name,
       },
-      workspace: user.workspaces[0]
+      workspace: user.workspaces[0],
+      workspaces: user.workspaces
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -65,6 +66,10 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    if (!user.password_hash) {
+      return res.status(401).json({ error: 'Please sign in using Google.' });
+    }
+
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -79,7 +84,8 @@ export const login = async (req, res) => {
         email: user.email,
         name: user.name,
       },
-      workspace: user.workspaces[0]
+      workspace: user.workspaces[0],
+      workspaces: user.workspaces
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -104,7 +110,8 @@ export const getMe = async (req, res) => {
         email: user.email,
         name: user.name,
       },
-      workspace: user.workspaces[0]
+      workspace: user.workspaces[0],
+      workspaces: user.workspaces
     });
   } catch (error) {
     console.error('Get me error:', error);

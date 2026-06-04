@@ -9,16 +9,20 @@ export default function CommandCenter() {
 
   const [stats, setStats] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const { workspace } = useAuth();
+  const { workspace, activeProductId } = useAuth();
 
   useEffect(() => {
     if (!workspace) return;
     const fetchDashboardData = async () => {
       try {
         const token = localStorage.getItem('nexus_token');
+        let tasksUrl = `/api/workspace/${workspace.id}/tasks`;
+        if (activeProductId) {
+          tasksUrl += `?productId=${activeProductId}`;
+        }
         const [statsRes, tasksRes] = await Promise.all([
           fetch(`/api/workspace/${workspace.id}/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch(`/api/workspace/${workspace.id}/tasks`, { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch(tasksUrl, { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         if (statsRes.ok) setStats(await statsRes.json());
@@ -28,7 +32,7 @@ export default function CommandCenter() {
       }
     };
     fetchDashboardData();
-  }, [workspace]);
+  }, [workspace, activeProductId]);
 
   const approve = async (taskId) => {
     try {
@@ -90,18 +94,17 @@ export default function CommandCenter() {
                 <div className="agent-avatar agent-cmo lg">N</div>
                 <div className="who">
                   Your CMO
-                  <span>Cutting ad spend on the wrong audience</span>
+                  <span>Awaiting next check-in</span>
                 </div>
                 <span className="pill pill-magenta" style={{ marginLeft: 'auto' }}>
                   <span className="dot dot-live"></span> Active
                 </span>
               </div>
               <div className="msg">
-                I rewrote your Meta ads for VP-Sales — early data is good (CTR up 2.4×). I need your sign-off before pushing them live.
+                Your AI team is currently idle or working on assigned tasks. Check back later for updates or assign new tasks in the War Room.
               </div>
               <div className="actions">
-                <Link to="/approvals" className="btn btn-primary btn-sm">Review new ads</Link>
-                <Link to="/war-room" className="btn btn-ghost btn-sm">Open War Room →</Link>
+                <Link to="/war-room" className="btn btn-primary btn-sm">Open War Room →</Link>
               </div>
             </div>
             
@@ -132,41 +135,17 @@ export default function CommandCenter() {
               ))}
             </div>
 
-            <div className="timeline-card">
-              <div className="head">
-                <div style={{ fontSize: '15px', fontWeight: 700 }}>This week</div>
-                <Link to="/war-room" className="btn btn-ghost btn-sm">Full log →</Link>
-              </div>
-              <div className="timeline-item">
-                <div className="time">11:42</div>
-                <div className="text"><strong>SMM</strong> drafted 3 ad variants. CMO accepted 2, sent 1 back.</div>
-              </div>
-              <div className="timeline-item">
-                <div className="time">9:15</div>
-                <div className="text"><strong>BDM</strong> enriched 200 prospects → 142 match new ICP.</div>
-              </div>
-              <div className="timeline-item">
-                <div className="time">Yest</div>
-                <div className="text"><strong>Data Analyst</strong> spotted demo no-show rate dropped 73% → 41%. Good signal.</div>
-              </div>
-              <div className="timeline-item">
-                <div className="time">Yest</div>
-                <div className="text">
-                  <strong style={{ color: 'var(--magenta)' }}>CMO disagreed</strong> with your "3× ad spend" request. <Link to="/war-room">See why →</Link>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div>
-            <div className="goal-card">
+              <div className="goal-card">
               <div className="gh">Your 90-day goal</div>
-              <div className="goal-title">$25k MRR by end of Q3</div>
-              <div className="progress"><span style={{ width: '57%' }}></span></div>
+              <div className="goal-title">{workspace?.goal || 'No goal set'}</div>
+              <div className="progress"><span style={{ width: '0%' }}></span></div>
               <div className="stats">
-                <div className="stat"><div className="v">$14.2k</div><div className="l">Today</div></div>
-                <div className="stat"><div className="v">$25k</div><div className="l">Target</div></div>
-                <div className="stat"><div className="v">42d</div><div className="l">Left</div></div>
+                <div className="stat"><div className="v">$0</div><div className="l">Today</div></div>
+                <div className="stat"><div className="v">--</div><div className="l">Target</div></div>
+                <div className="stat"><div className="v">90d</div><div className="l">Left</div></div>
               </div>
             </div>
 
@@ -177,51 +156,51 @@ export default function CommandCenter() {
                 <div className="agent-avatar agent-cmo">N</div>
                 <div className="info">
                   <div className="name">CMO</div>
-                  <div className="task">Reviewing ad copy</div>
+                  <div className="task">Idle</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
               <div className="agent-row">
                 <div className="agent-avatar agent-seo">SEO</div>
                 <div className="info">
                   <div className="name">SEO Architect</div>
-                  <div className="task">Mapping 12 keywords</div>
+                  <div className="task">Awaiting assignment</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
               <div className="agent-row">
                 <div className="agent-avatar agent-smm">S</div>
                 <div className="info">
                   <div className="name">SMM Specialist</div>
-                  <div className="task">Drafting ad variants</div>
+                  <div className="task">Awaiting assignment</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
               <div className="agent-row">
                 <div className="agent-avatar agent-bdm">B</div>
                 <div className="info">
                   <div className="name">Growth BDM</div>
-                  <div className="task">Building prospect list (142/200)</div>
+                  <div className="task">Awaiting assignment</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
               <div className="agent-row">
                 <div className="agent-avatar agent-design">D</div>
                 <div className="info">
                   <div className="name">Designer</div>
-                  <div className="task">Rebuilding sales deck</div>
+                  <div className="task">Awaiting assignment</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
               <div className="agent-row">
                 <div className="agent-avatar agent-data">DA</div>
                 <div className="info">
                   <div className="name">Data Analyst</div>
-                  <div className="task">Setting up GA4 goals</div>
+                  <div className="task">Awaiting assignment</div>
                 </div>
-                <span className="dot dot-live"></span>
+                <span className="dot dot-idle"></span>
               </div>
-
+            
               <Link to="/team" className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: '10px' }}>
                 See full team →
               </Link>

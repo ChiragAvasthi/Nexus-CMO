@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './TeamAssembly.css';
 
 export default function TeamAssembly() {
   const navigate = useNavigate();
+  const { workspace } = useAuth();
 
   return (
     <div className="team-assembly-wrap">
@@ -20,7 +22,7 @@ export default function TeamAssembly() {
         <div className="info">
           <div className="who">Alex · CMO</div>
           <div className="msg">
-            Based on your goal (<strong>$25k MRR in 90 days</strong>) and what's broken, I'm activating
+            Based on your goal (<strong>{workspace?.goal || 'Growth'}</strong>) and what's broken, I'm activating
             <strong> Maya, Jordan, Casey, Marcus &amp; Devon</strong>. Skipping Priya, Riley, &amp; Quinn for now — they'll add value later
             but aren't urgent. <strong>You can override any of this.</strong>
           </div>
@@ -40,7 +42,7 @@ export default function TeamAssembly() {
               <div className="role-title">SEO Architect</div>
             </div>
           </div>
-          <div className="task">Mapping 12 keywords your competitors rank for — you don't.</div>
+          <div className="task">Auditing your digital footprint and SEO gaps.</div>
           <div className="status-row">
             <span className="ta-status-pill ta-pill-working"><span className="dot dot-live"></span> Working</span>
           </div>
@@ -55,7 +57,7 @@ export default function TeamAssembly() {
               <div className="role-title">SMM Specialist</div>
             </div>
           </div>
-          <div className="task">Auditing your 3 active Meta ad sets for ICP misalignment.</div>
+          <div className="task">Reviewing past ad campaigns and audience targeting.</div>
           <div className="status-row">
             <span className="ta-status-pill ta-pill-working"><span className="dot dot-live"></span> Working</span>
           </div>
@@ -67,10 +69,10 @@ export default function TeamAssembly() {
             <div className="role-icon" style={{ background: '#ccfbf1' }}>🧭</div>
             <div>
               <div className="role-name">Casey</div>
-              <div className="role-title">Lead Scout</div>
+              <div className="role-title">Growth BDM</div>
             </div>
           </div>
-          <div className="task">Reading 6 won deals to define your real ICP.</div>
+          <div className="task">Identifying your ideal customer profile and outreach channels.</div>
           <div className="status-row">
             <span className="ta-status-pill ta-pill-working"><span className="dot dot-live"></span> Working</span>
           </div>
@@ -85,7 +87,7 @@ export default function TeamAssembly() {
               <div className="role-title">Outreach Specialist</div>
             </div>
           </div>
-          <div className="task">Studying your sales deck for messaging hooks.</div>
+          <div className="task">Preparing cold outreach scripts and email frameworks.</div>
           <div className="status-row">
             <span className="ta-status-pill ta-pill-working"><span className="dot dot-live"></span> Working</span>
           </div>
@@ -100,7 +102,7 @@ export default function TeamAssembly() {
               <div className="role-title">Implementation</div>
             </div>
           </div>
-          <div className="task">Checking your site for missing GA4 tags &amp; broken tracking.</div>
+          <div className="task">Setting up tracking tools and CRM integrations.</div>
           <div className="status-row">
             <span className="ta-status-pill ta-pill-working"><span className="dot dot-live"></span> Working</span>
           </div>

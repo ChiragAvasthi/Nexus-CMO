@@ -170,10 +170,17 @@ a:hover { text-decoration: underline; }
   border: none; color: white;
   box-shadow: var(--shadow-glow);
 }
-.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:hover, .btn-primary:active { 
+  background: var(--gradient-cmo) !important; 
+  filter: brightness(1.05); 
+  color: white !important; 
+}
 .btn-danger { background: var(--red-soft); color: var(--red); border-color: #fecaca; }
+.btn-danger:hover, .btn-danger:active { background: #fee2e2; } /* Keep it red */
 .btn-success { background: var(--green-soft); color: var(--green); border-color: #bbf7d0; }
+.btn-success:hover, .btn-success:active { background: #d1fae5; } /* Keep it green */
 .btn-ghost { background: transparent; border-color: var(--border-2); }
+.btn-ghost:hover, .btn-ghost:active { background: var(--bg-2) !important; color: inherit !important; }
 .btn-sm { padding: 7px 13px; font-size: 13px; }
 .btn-lg { padding: 13px 24px; font-size: 15px; }
 

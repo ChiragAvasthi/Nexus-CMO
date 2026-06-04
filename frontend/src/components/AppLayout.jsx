@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const location = useLocation();
-  const { user, workspace, loading, logout } = useAuth();
+  const { user, workspace, loading, logout, products, activeProductId, switchProduct } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +14,27 @@ export default function AppLayout() {
       navigate('/signup');
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (!workspace) return;
+    
+    const fetchTasksCount = async () => {
+      try {
+        const token = localStorage.getItem('nexus_token');
+        const res = await fetch(`/api/workspace/${workspace.id}/tasks`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPendingCount(data.filter(t => t.status === 'pending').length);
+        }
+      } catch (err) {}
+    };
+
+    fetchTasksCount();
+    const interval = setInterval(fetchTasksCount, 10000);
+    return () => clearInterval(interval);
+  }, [workspace]);
 
   if (loading) {
     return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)', color: 'var(--text-2)' }}>Loading Nexus...</div>;
@@ -23,9 +45,23 @@ export default function AppLayout() {
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
       <div className="app">
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="logo">
-          <div className="mark">N</div>
-          <span>Nexus CMO</span>
+        <div className="logo" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '20px 24px 10px', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="mark">N</div>
+            <span>Nexus CMO</span>
+          </div>
+          
+          {products && products.length > 0 && (
+            <select 
+              value={activeProductId || ''} 
+              onChange={(e) => switchProduct(e.target.value)}
+              style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-1)', background: 'var(--bg-0)', color: 'var(--text-1)', outline: 'none', cursor: 'pointer', fontSize: '14px' }}
+            >
+              {products.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
         </div>
         
         <div className="section-label" style={{ margin: 0, padding: '18px 24px 8px' }}>Workspace</div>
@@ -43,13 +79,15 @@ export default function AppLayout() {
             <span>🗂</span><span>Asset Library</span>
           </NavLink>
           <NavLink to="/approvals" className={({ isActive }) => (isActive ? 'active' : '')}>
-            <span>✓</span><span>Approvals</span><span className="badge">4</span>
+            <span>✓</span><span>Approvals</span>{pendingCount > 0 && <span className="badge">{pendingCount}</span>}
           </NavLink>
         </nav>
 
         <div className="section-label" style={{ margin: 0, padding: '18px 24px 8px' }}>Account</div>
         <nav onClick={() => setSidebarOpen(false)}>
-          <Link to="/settings"><span>⚙</span><span>Settings</span></Link>
+          <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <span>⚙</span><span>Settings</span>
+          </NavLink>
           <Link to="/billing"><span>💳</span><span>Billing</span></Link>
           <a onClick={logout} style={{ cursor: 'pointer' }}><span>🚪</span><span>Sign out</span></a>
         </nav>

@@ -10,7 +10,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault();
     setError(null);
     try {
       const res = await fetch('/api/auth/login', {
@@ -21,7 +22,7 @@ export default function Login() {
       const data = await res.json();
       
       if (res.ok) {
-        login(data.token, data.user, data.workspace);
+        login(data.token, data.user, data.workspace, data.workspaces);
       } else {
         setError(data.error || 'Login failed');
       }
@@ -52,22 +53,24 @@ export default function Login() {
 
         {error && <div style={{ color: 'var(--red)', fontSize: '14px', marginBottom: '10px' }}>{error}</div>}
 
-        <div className="form-group">
-          <label>Work email</label>
-          <input type="email" placeholder="you@yourcompany.com" value={email} onChange={e => setEmail(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input type="password" placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} />
-        </div>
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label>Work email</label>
+            <input type="email" placeholder="you@yourcompany.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
+          <div className="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="••••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+          </div>
 
-        <button 
-          className="btn btn-primary btn-lg" 
-          style={{ width: '100%', justifyContent: 'center' }}
-          onClick={handleLogin}
-        >
-          Sign In
-        </button>
+          <button 
+            type="submit"
+            className="btn btn-primary btn-lg" 
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            Sign In
+          </button>
+        </form>
 
         <div className="switch-link">Don't have an account? <Link to="/signup">Sign up</Link></div>
       </div>
