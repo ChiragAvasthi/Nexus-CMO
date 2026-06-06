@@ -49,7 +49,8 @@ passport.use(
             },
           },
         });
-
+        
+        user.isNewUser = true;
         return done(null, user);
       } catch (error) {
         return done(error, null);

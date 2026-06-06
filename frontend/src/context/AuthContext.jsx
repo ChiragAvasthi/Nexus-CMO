@@ -77,7 +77,7 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  const login = async (token, user, workspace, workspacesList) => {
+  const login = async (token, user, workspace, workspacesList, isNewUser = false) => {
     localStorage.setItem('nexus_token', token);
     setUser(user);
     setWorkspace(workspace);
@@ -85,7 +85,11 @@ export function AuthProvider({ children }) {
     if (workspace) {
       await fetchProducts(workspace.id);
     }
-    navigate('/command-center');
+    if (isNewUser) {
+      navigate('/onboarding');
+    } else {
+      navigate('/command-center');
+    }
   };
 
   const logout = () => {

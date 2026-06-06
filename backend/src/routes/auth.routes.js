@@ -24,7 +24,11 @@ router.get(
     
     // Redirect to frontend with token in the URL query string
     // The frontend will grab the token from the URL, save it to localStorage, and navigate to the dashboard
-    res.redirect(`http://localhost:5173/auth/callback?token=${token}`);
+    let redirectUrl = `http://localhost:5173/auth/callback?token=${token}`;
+    if (req.user.isNewUser) {
+      redirectUrl += '&isNew=true';
+    }
+    res.redirect(redirectUrl);
   }
 );
 

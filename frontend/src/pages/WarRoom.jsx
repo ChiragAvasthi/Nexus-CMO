@@ -43,7 +43,7 @@ export default function WarRoom() {
 
     // Initialize Socket.io connection
     socketRef.current = io('http://localhost:5000');
-    
+
     socketRef.current.emit('join_workspace', workspace.id);
 
     // Listen for incoming messages (from CMO or other agents)
@@ -70,7 +70,7 @@ export default function WarRoom() {
   const sendMessage = () => {
     const text = inputVal.trim();
     if (!text || !workspace) return;
-    
+
     // Optimistically add to UI
     const userMsg = { type: 'user', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
     setExtraMessages(prev => [...prev, userMsg]);

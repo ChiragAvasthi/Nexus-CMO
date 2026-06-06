@@ -99,6 +99,49 @@ Industry: ${workspace.industry || 'Not specified'}
     return "Sorry, I ran into a cognitive error while processing that. Can we try again?";
   }
 }
+export async function generateTruthReport(companyContext) {
+  if (!ai) {
+    return null;
+  }
+
+  const prompt = `You are Alex, an expert CMO. The user just onboarded. Generate a brutal, highly analytical "Truth Report" for their company based on the following context:
+Company: ${companyContext.companyName}
+Industry: ${companyContext.industry}
+Target Audience: ${companyContext.targetAudience}
+Product: ${companyContext.productName}
+What Failed: ${companyContext.failedEffort}
+What Worked: ${companyContext.workedEffort}
+90-Day Goal: ${companyContext.goal}
+Current State: ${companyContext.currentState}
+Monthly Budget: ${companyContext.budget}
+Uploaded Files: ${companyContext.uploadedFiles.join(', ') || 'None'}
+Connected Integrations: ${companyContext.integrations.join(', ') || 'None'}
+
+You MUST respond with a RAW JSON array of exactly 3-5 objects. Each object must have these keys:
+"id" (number), "severity" ("critical", "high", or "medium"), "title" (string, the problem), "detail" (string, explanation referencing their specific context like budget/files/integrations), "fix" (string, the solution), "agentLabel" ("S", "B", "D", "DA", or "SEO"), "agentName" ("SMM", "BDM", "Designer", "Data Analyst", or "SEO Architect").`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        systemInstruction: "You are an analytical AI that ONLY outputs raw JSON arrays. Do not use markdown wrappers.",
+        temperature: 0.3,
+        responseMimeType: "application/json",
+      }
+    });
+
+    try {
+      return JSON.parse(response.text);
+    } catch (e) {
+      console.error("Failed to parse Truth Report JSON:", e);
+      return null;
+    }
+  } catch (error) {
+    console.error('Truth Report generation error:', error);
+    return null;
+  }
+}
 
 export async function evaluateTaskByCmo(taskDescription, assetContent, workspace) {
   if (!ai) return { approved: true, feedback: "" }; // Bypass if offline

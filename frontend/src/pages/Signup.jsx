@@ -23,7 +23,7 @@ export default function Signup() {
       const data = await res.json();
       
       if (res.ok) {
-        login(data.token, data.user, data.workspace, data.workspaces);
+        login(data.token, data.user, data.workspace, data.workspaces, data.isNewUser);
       } else {
         setError(data.error || 'Registration failed');
       }

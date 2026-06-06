@@ -74,7 +74,7 @@ export const getMessages = async (req, res) => {
 export const generateReport = async (req, res) => {
   try {
     const { id } = req.params;
-    const { companyName, industry, productName, targetAudience, currentProblem, goal, budget } = req.body;
+    const { companyName, industry, productName, targetAudience, failedEffort, workedEffort, goal, currentState, budget, uploadedFiles, integrations } = req.body;
     
     // Save to workspace
     await prisma.workspace.update({
@@ -82,33 +82,56 @@ export const generateReport = async (req, res) => {
       data: { companyName, industry }
     });
 
-    // Create the first product
-    const product = await prisma.product.create({
-      data: {
-        workspaceId: id,
-        name: productName || 'Core Product',
-        targetAudience,
-        currentProblem,
-        goal,
-        budget
-      }
+    // Find existing product to avoid duplicates
+    let product = await prisma.product.findFirst({
+      where: { workspaceId: id },
+      orderBy: { createdAt: 'asc' }
     });
 
-    const prompt = `You are Alex, an expert CMO. The user just onboarded. Generate a brutal, highly analytical "Truth Report" for their company.
-    Company: ${companyName}
-    Industry: ${industry}
-    Target Audience: ${targetAudience}
-    Current Problem: ${currentProblem}
-    
-    You MUST respond with a RAW JSON array of exactly 3-5 objects (NO MARKDOWN WRAPPERS like \`\`\`json). Each object must have these keys:
-    "id" (number), "severity" ("critical", "high", or "medium"), "title" (string, the problem), "detail" (string, explanation), "fix" (string, the solution), "agentLabel" ("S", "B", "D", "DA", or "SEO"), "agentName" ("SMM", "BDM", "Designer", "Data Analyst", or "SEO Architect").`;
+    if (product) {
+      product = await prisma.product.update({
+        where: { id: product.id },
+        data: {
+          name: productName || 'Core Product',
+          targetAudience,
+          currentProblem: `${failedEffort} | ${workedEffort}`,
+          goal,
+          budget
+        }
+      });
+    } else {
+      product = await prisma.product.create({
+        data: {
+          workspaceId: id,
+          name: productName || 'Core Product',
+          targetAudience,
+          currentProblem: `${failedEffort} | ${workedEffort}`,
+          goal,
+          budget
+        }
+      });
+    }
 
-    const rawJsonString = await generateCmoResponse(prompt, []);
+    const { generateTruthReport } = await import('../services/ai.service.js');
     
-    // Clean up markdown if Gemini accidentally added it
-    const cleanJson = rawJsonString.replace(/```json/g, '').replace(/```/g, '').trim();
+    const reportJson = await generateTruthReport({
+      companyName,
+      industry,
+      targetAudience,
+      productName,
+      failedEffort,
+      workedEffort,
+      goal,
+      currentState,
+      budget,
+      uploadedFiles: uploadedFiles || [],
+      integrations: integrations || []
+    });
     
-    const reportJson = JSON.parse(cleanJson);
+    if (!reportJson) {
+      throw new Error("Failed to generate Truth Report");
+    }
+
     res.json({ loopholes: reportJson });
   } catch (err) {
     console.error('Failed to generate report JSON:', err);

@@ -17,6 +17,7 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -25,5 +26,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Backend specifics
+backend/uploads/
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Frontend specifics
+frontend/dist/
 
 REQ

@@ -7,6 +7,7 @@ import authRoutes from './src/routes/auth.routes.js';
 import workspaceRoutes from './src/routes/workspace.routes.js';
 import assetsRoutes from './src/routes/assets.routes.js';
 import tasksRoutes from './src/routes/tasks.routes.js';
+import integrationRoutes from './src/routes/integration.routes.js';
 import passport from './src/config/passport.js';
 import { PrismaClient } from '@prisma/client';
 import { generateCmoResponse } from './src/services/ai.service.js';
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/workspace', workspaceRoutes);
 app.use('/api/assets', assetsRoutes);
 app.use('/api/tasks', tasksRoutes);
+app.use('/api/workspace/:workspaceId/integrations', integrationRoutes);
 
 // Basic Health Check
 app.get('/api/health', (req, res) => {

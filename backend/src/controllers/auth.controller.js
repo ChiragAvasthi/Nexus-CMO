@@ -45,7 +45,8 @@ export const register = async (req, res) => {
         name: user.name,
       },
       workspace: user.workspaces[0],
-      workspaces: user.workspaces
+      workspaces: user.workspaces,
+      isNewUser: true
     });
   } catch (error) {
     console.error('Registration error:', error);

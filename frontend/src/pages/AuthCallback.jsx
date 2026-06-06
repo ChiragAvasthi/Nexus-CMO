@@ -7,9 +7,14 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const token = searchParams.get('token');
+    const isNew = searchParams.get('isNew') === 'true';
     if (token) {
       localStorage.setItem('nexus_token', token);
-      navigate('/command-center', { replace: true });
+      if (isNew) {
+        navigate('/onboarding', { replace: true });
+      } else {
+        navigate('/command-center', { replace: true });
+      }
     } else {
       navigate('/signup', { replace: true });
     }

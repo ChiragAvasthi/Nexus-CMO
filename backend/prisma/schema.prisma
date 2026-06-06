@@ -34,6 +34,7 @@ model Workspace {
   assets          Asset[]
   tasks           Task[]
   messages        Message[]
+  integrations    Integration[]
 }
 
 model Product {
@@ -91,4 +92,15 @@ model Message {
   createdAt   DateTime  @default(now())
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   product     Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Integration {
+  id          String    @id @default(uuid())
+  workspaceId String
+  provider    String    // e.g., 'google_analytics', 'search_console', 'meta_ads', 'linkedin'
+  status      String    // e.g., 'connected'
+  connectedAt DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  
+  @@unique([workspaceId, provider])
 }
