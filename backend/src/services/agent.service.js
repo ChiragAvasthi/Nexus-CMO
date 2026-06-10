@@ -55,8 +55,7 @@ export async function executeTacticalTask(task, workspace) {
   // For now, we will pass product data if available. Actually, we should fetch it if task.productId exists.
   let productInfo = '';
   if (task.productId) {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = (await import('../config/db.js')).default;
     const product = await prisma.product.findUnique({ where: { id: task.productId } });
     if (product) {
       productInfo = `

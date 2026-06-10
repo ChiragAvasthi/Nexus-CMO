@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
+import prisma from '../config/db.js';
 export const getAssets = async (req, res) => {
   try {
     // In a real app we'd filter by workspaceId.

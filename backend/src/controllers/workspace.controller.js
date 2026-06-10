@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { generateCmoResponse } from '../services/ai.service.js';
-
-const prisma = new PrismaClient();
+import prisma from '../config/db.js';
 
 export const getStats = async (req, res) => {
   try {

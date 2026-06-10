@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
+import prisma from '../config/db.js';
 export const getTasks = async (req, res) => {
   try {
     const { id } = req.params;

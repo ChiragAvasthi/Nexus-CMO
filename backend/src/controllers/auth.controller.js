@@ -1,9 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
-
+import prisma from '../config/db.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'nexus-cmo-dev-secret';
 
 export const register = async (req, res) => {

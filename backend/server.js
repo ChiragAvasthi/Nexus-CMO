@@ -9,8 +9,9 @@ import assetsRoutes from './src/routes/assets.routes.js';
 import tasksRoutes from './src/routes/tasks.routes.js';
 import integrationRoutes from './src/routes/integration.routes.js';
 import passport from './src/config/passport.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from './src/config/db.js';
 import { generateCmoResponse } from './src/services/ai.service.js';
+import { errorHandler } from './src/middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -22,8 +23,6 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
-const prisma = new PrismaClient();
-
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -218,6 +217,9 @@ io.on('connection', (socket) => {
     console.log('Client disconnected:', socket.id);
   });
 });
+
+// Global Error Handler
+app.use(errorHandler);
 
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
