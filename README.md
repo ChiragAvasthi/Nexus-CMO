@@ -1,16 +1,33 @@
-# React + Vite
+# Nexus CMO
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Nexus CMO** is an AI-powered Fractional Chief Marketing Officer (CMO) platform designed to help founders and growth teams build, manage, and execute marketing strategies autonomously. It acts as a dedicated marketing command center, analyzing workspace data and deploying specialized AI agents to handle marketing operations.
 
-Currently, two official plugins are available:
+> **Status:** 🚧 Work in Progress
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Automated Onboarding & Truth Report:** Ingests company profiles, target audiences, current bottlenecks, and budgets to generate an initial "Truth Report."
+- **AI Agent War Room:** A real-time command center where users can interact with specialized AI agents (e.g., SMM experts, copywriters) via live chat (powered by Socket.io and Gemini AI).
+- **Workspace Management:** Complete separation of workspaces and products, allowing users to manage multiple brands or projects from a single unified dashboard.
+- **Dynamic Dashboards:** Real-time metrics tracking MRR, leads, CPA, and goal progress.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+### Frontend
+- **Framework:** React + Vite
+- **Styling:** Custom CSS with responsive grid/flexbox layouts
+- **Routing:** React Router DOM
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Backend
+- **Server:** Node.js + Express
+- **Database:** Prisma (SQLite)
+- **Real-time:** Socket.io for live AI agent streaming
+- **AI Integration:** Google Gemini GenAI SDK
+- **Authentication:** JWT & bcrypt
+
+## Getting Started
+
+*(Instructions for setup, environment variables, and running the application will be added as the project nears initial release).*
+
+---
+*© 2026 Nexus CMO. All rights reserved.*
